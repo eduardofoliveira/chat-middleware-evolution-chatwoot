@@ -12,11 +12,11 @@ import findContactPhoneNumber from "../use-cases/contact/findContactPhoneNumber.
 import findOpenByContact from "../use-cases/conversation/findOpenByContact.js";
 import { salvarMidia } from "../util/evolution.js";
 
-const CHATWOOT_URL = "https://chatwoot.cloudcom.com.br";
-const API_TOKEN = "n6zGScvNEKuZaYTMxEicoK76";
+const CHATWOOT_URL = process.env.CHATWOOT_URL;
+const API_TOKEN = process.env.CHATWOOT_TOKEN;
 
-const EVOLUTION_URL = "http://localhost:8080";
-const EVOLUTION_API_TOKEN = "429683C4C977415CAAFCCE10F7D57E11";
+const EVOLUTION_URL = process.env.EVOLUTION_URL;
+const EVOLUTION_API_TOKEN = process.env.EVOLUTION_API_TOKEN;
 
 const albums: Record<string, any[]> = {};
 const albumCount: Record<string, number> = {};
