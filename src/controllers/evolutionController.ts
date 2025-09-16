@@ -51,6 +51,8 @@ const handleEvolutionWebhook = async (
       messageType: data?.messageType,
     })
 
+    console.log(JSON.stringify(body, null, 2));
+
     if (body.event !== 'messages.upsert') {
       return reply.status(200).send({ status: 'ignored', event: body.event });
     }
