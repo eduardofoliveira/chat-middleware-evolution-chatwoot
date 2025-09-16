@@ -1,4 +1,5 @@
 import "dotenv/config";
+import cors from '@fastify/cors'
 import Fastify from "fastify";
 // import axios from "axios"; 
 // import path from "path";
@@ -17,6 +18,9 @@ import evolutionRoutes from "./routes/evolutionRoutes.js";
 
 const server = Fastify({
   logger: false,
+});
+server.register(cors, {
+  origin: true
 });
 
 // const albums: Record<string, any[]> = {};
