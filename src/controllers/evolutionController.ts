@@ -38,32 +38,32 @@ const handleEvolutionWebhook = async (
       return reply.code(200).send();
     }
 
-    console.log({
-      account_id,
-      inbox_id,
-      EVOLUTION_URL,
-      EVOLUTION_API_TOKEN,
-      CHATWOOT_URL,
-      API_TOKEN,
-      EVENT: body.event,
-      instance: body.instance,
-      identifier: data?.key?.remoteJid,
-      messageType: data?.messageType,
-    })
+    // console.log({
+    //   account_id,
+    //   inbox_id,
+    //   EVOLUTION_URL,
+    //   EVOLUTION_API_TOKEN,
+    //   CHATWOOT_URL,
+    //   API_TOKEN,
+    //   EVENT: body.event,
+    //   instance: body.instance,
+    //   identifier: data?.key?.remoteJid,
+    //   messageType: data?.messageType,
+    // })
 
-    console.log(JSON.stringify(body, null, 2));
+    // console.log(JSON.stringify(body, null, 2));
 
     if (body.event !== 'messages.upsert') {
       return reply.status(200).send({ status: 'ignored', event: body.event });
     }
 
-    console.log({
-      account_id,
-      identifier: data?.key?.remoteJid,
-      messageType: data?.messageType,
-      event: body.event,
-      instance: body.instance,
-    })
+    // console.log({
+    //   account_id,
+    //   identifier: data?.key?.remoteJid,
+    //   messageType: data?.messageType,
+    //   event: body.event,
+    //   instance: body.instance,
+    // })
 
     const isGroup = data.key.remoteJid?.endsWith('@g.us');
     let conversation_id = null;
@@ -105,23 +105,23 @@ const handleEvolutionWebhook = async (
           }
         });
 
-        console.log(profileData.data.picture)
+        // console.log(profileData.data.picture)
         if (profileData.data.picture) {
           // download file
-          console.log('Baixando foto do contato:', profileData.data.picture);
+          // console.log('Baixando foto do contato:', profileData.data.picture);
           const avatarBuffer = await axios.get<Buffer>(profileData.data.picture, {
             responseType: 'arraybuffer'
           }).then(res => res.data);
 
-          console.log('Foto do contato baixada, tamanho:', avatarBuffer.length);
+          // console.log('Foto do contato baixada, tamanho:', avatarBuffer.length);
           // save file into /files
           fs.writeFileSync(path.resolve('files', `${data.key.remoteJid}.jpg`), avatarBuffer);
-          console.log('Foto do contato salva em:', path.resolve('files', `${data.key.remoteJid}.jpg`));
+          // console.log('Foto do contato salva em:', path.resolve('files', `${data.key.remoteJid}.jpg`));
 
           const form = new FormData();
           form.append("avatar", fs.createReadStream(path.resolve('files', `${data.key.remoteJid}.jpg`)));
 
-          request.log.info(`✅ Foto do contato ${data.key.remoteJid} enviando para o Chatwoot`);
+          // request.log.info(`✅ Foto do contato ${data.key.remoteJid} enviando para o Chatwoot`);
 
           await axios.put(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/contacts/${contact?.id}`, form, {
             headers: {
@@ -130,12 +130,12 @@ const handleEvolutionWebhook = async (
             },
           });
 
-          console.log(`Foto do contato ${data.key.remoteJid} enviada para o Chatwoot`);
+          // console.log(`Foto do contato ${data.key.remoteJid} enviada para o Chatwoot`);
           fs.unlink(path.resolve('files', `${data.key.remoteJid}.jpg`), (err) => {
             if (err) {
               console.error(`Erro ao deletar arquivo ${data.key.remoteJid}.jpg:`, err);
             } else {
-              console.log(`Arquivo ${data.key.remoteJid}.jpg deletado com sucesso.`);
+              // console.log(`Arquivo ${data.key.remoteJid}.jpg deletado com sucesso.`);
             }
           });
         }
@@ -150,10 +150,10 @@ const handleEvolutionWebhook = async (
         }
       });
 
-      console.log({
-        groupInfo: groupInfo.data,
-        pictureUrl: groupInfo.data.pictureUrl
-      })
+      // console.log({
+      //   groupInfo: groupInfo.data,
+      //   pictureUrl: groupInfo.data.pictureUrl
+      // })
 
       // criar contato do grupo
       await createContact({
@@ -183,20 +183,20 @@ const handleEvolutionWebhook = async (
       // upload da foto do grupo para o chatwoot
       if (groupInfo.data.pictureUrl) {
         // download file
-        console.log('Baixando foto do grupo:', groupInfo.data.pictureUrl);
+        // console.log('Baixando foto do grupo:', groupInfo.data.pictureUrl);
         const avatarBuffer = await axios.get<Buffer>(groupInfo.data.pictureUrl, {
           responseType: 'arraybuffer'
         }).then(res => res.data);
 
-        console.log('Foto do grupo baixada, tamanho:', avatarBuffer.length);
+        // console.log('Foto do grupo baixada, tamanho:', avatarBuffer.length);
         // save file into /files
         fs.writeFileSync(path.resolve('files', `${data.key.remoteJid}.jpg`), avatarBuffer);
-        console.log('Foto do grupo salva em:', path.resolve('files', `${data.key.remoteJid}.jpg`));
+        // console.log('Foto do grupo salva em:', path.resolve('files', `${data.key.remoteJid}.jpg`));
 
         const form = new FormData();
         form.append("avatar", fs.createReadStream(path.resolve('files', `${data.key.remoteJid}.jpg`)));
 
-        request.log.info(`✅ Foto do grupo ${data.key.remoteJid} enviando para o Chatwoot`);
+        // request.log.info(`✅ Foto do grupo ${data.key.remoteJid} enviando para o Chatwoot`);
 
         await axios.put(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/contacts/${contact?.id}`, form, {
           headers: {
@@ -205,17 +205,17 @@ const handleEvolutionWebhook = async (
           },
         });
 
-        console.log(`Foto do grupo ${data.key.remoteJid} enviada para o Chatwoot`);
+        // console.log(`Foto do grupo ${data.key.remoteJid} enviada para o Chatwoot`);
         fs.unlink(path.resolve('files', `${data.key.remoteJid}.jpg`), (err) => {
           if (err) {
             console.error(`Erro ao deletar arquivo ${data.key.remoteJid}.jpg:`, err);
           } else {
-            console.log(`Arquivo ${data.key.remoteJid}.jpg deletado com sucesso.`);
+            // console.log(`Arquivo ${data.key.remoteJid}.jpg deletado com sucesso.`);
           }
         });
       }
     } else {
-      console.log('Contato encontrado:', contact);
+      // console.log('Contato encontrado:', contact);
     }
 
     const conversation = await findOpenByContact({ contact_id: contact.id, account_id: Number(account_id), inbox_id: Number(inbox_id) });
@@ -238,7 +238,7 @@ const handleEvolutionWebhook = async (
       conversation_id = conversation.display_id
     }
 
-    console.log('Nova mensagem:', JSON.stringify(data, null, 2));
+    // console.log('Nova mensagem:', JSON.stringify(data, null, 2));
     let header = ''
     if (isGroup) {
       header = `**${data.pushName} - +${/(.*)@/.exec(data.key.participant)?.[1]}:**\n`;
@@ -249,12 +249,12 @@ const handleEvolutionWebhook = async (
       const albumId = data.key.id;
       albums[albumId] = [];
       albumCount[albumId] = data.message.albumMessage?.expectedImageCount || 0;
-      request.log.info(`📂 Novo álbum iniciado: ${albumId}`);
+      // request.log.info(`📂 Novo álbum iniciado: ${albumId}`);
 
       setTimeout(async () => {
-        console.log('Álbum completo:', albums[albumId]);
-        console.log('Caption:', albumCaptions[albumId]);
-        console.log('Enviar para Chatwoot');
+        // console.log('Álbum completo:', albums[albumId]);
+        // console.log('Caption:', albumCaptions[albumId]);
+        // console.log('Enviar para Chatwoot');
 
         // como enviar as imagens para o Chatwoot
         const form = new FormData();
@@ -266,7 +266,7 @@ const handleEvolutionWebhook = async (
         }
         form.append("message_type", 'incoming');
 
-        request.log.info(`✅ Álbum ${albumId} enviando para Chatwoot`);
+        // request.log.info(`✅ Álbum ${albumId} enviando para Chatwoot`);
 
         await axios.post(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations/${conversation_id}/messages`, form, {
           headers: {
@@ -275,7 +275,7 @@ const handleEvolutionWebhook = async (
           },
         });
 
-        request.log.info(`✅ Álbum ${albumId} enviado para Chatwoot`);
+        // request.log.info(`✅ Álbum ${albumId} enviado para Chatwoot`);
 
         if (albums[albumId]) {
           for (const filePath of albums[albumId]) {
@@ -283,7 +283,7 @@ const handleEvolutionWebhook = async (
               if (err) {
                 console.error(`Erro ao deletar arquivo ${filePath}:`, err);
               } else {
-                console.log(`Arquivo ${filePath} deletado com sucesso.`);
+                // console.log(`Arquivo ${filePath} deletado com sucesso.`);
               }
             });
           }
@@ -329,7 +329,7 @@ const handleEvolutionWebhook = async (
       if (typeof data.message?.conversation === 'string') {
         // mensagem de texto simples
         const content = data.message?.conversation;
-        console.log('Conteúdo da mensagem:', content);
+        // console.log('Conteúdo da mensagem:', content);
         await axios.post(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations/${conversation_id}/messages`, {
           content: `${header}${content}`,
           message_type: 'incoming'
@@ -359,7 +359,7 @@ const handleEvolutionWebhook = async (
         form.append("content", `${header}${data.message.imageMessage.caption}`);
       }
 
-      request.log.info(`✅ Imagem ${data.key.id} enviando para Chatwoot`);
+      // request.log.info(`✅ Imagem ${data.key.id} enviando para Chatwoot`);
 
       await axios.post(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations/${conversation_id}/messages`, form, {
         headers: {
@@ -373,12 +373,12 @@ const handleEvolutionWebhook = async (
           if (err) {
             console.error(`Erro ao deletar arquivo ${data.key.id}.${mime.extension(data.message.imageMessage.mimetype || 'jpg')}:`, err);
           } else {
-            console.log(`Arquivo ${data.key.id}.${mime.extension(data.message.imageMessage.mimetype || 'jpg')} deletado com sucesso.`);
+            // console.log(`Arquivo ${data.key.id}.${mime.extension(data.message.imageMessage.mimetype || 'jpg')} deletado com sucesso.`);
           }
         }
       );
 
-      request.log.info(`✅ Imagem ${data.key.id} enviada para Chatwoot`);
+      // request.log.info(`✅ Imagem ${data.key.id} enviada para Chatwoot`);
     }
 
     if (data.messageType === 'videoMessage') {
@@ -397,7 +397,7 @@ const handleEvolutionWebhook = async (
         form.append("content", `${header}${data.message.videoMessage.caption}`);
       }
 
-      request.log.info(`✅ Vídeo ${data.key.id} enviando para Chatwoot`);
+      // request.log.info(`✅ Vídeo ${data.key.id} enviando para Chatwoot`);
 
       await axios.post(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations/${conversation_id}/messages`, form, {
         headers: {
@@ -411,12 +411,12 @@ const handleEvolutionWebhook = async (
           if (err) {
             console.error(`Erro ao deletar arquivo ${data.key.id}.${mime.extension(data.message.videoMessage.mimetype || 'mp4')}:`, err);
           } else {
-            console.log(`Arquivo ${data.key.id}.${mime.extension(data.message.videoMessage.mimetype || 'mp4')} deletado com sucesso.`);
+            // console.log(`Arquivo ${data.key.id}.${mime.extension(data.message.videoMessage.mimetype || 'mp4')} deletado com sucesso.`);
           }
         }
       );
 
-      request.log.info(`✅ Vídeo ${data.key.id} enviado para Chatwoot`);
+      // request.log.info(`✅ Vídeo ${data.key.id} enviado para Chatwoot`);
     }
 
     if (data.messageType === 'stickerMessage') {
@@ -431,7 +431,7 @@ const handleEvolutionWebhook = async (
         form.append("content", header);
       }
 
-      request.log.info(`✅ Figurinha ${data.key.id} enviando para Chatwoot`);
+      // request.log.info(`✅ Figurinha ${data.key.id} enviando para Chatwoot`);
 
       await axios.post(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations/${conversation_id}/messages`, form, {
         headers: {
@@ -440,13 +440,13 @@ const handleEvolutionWebhook = async (
         },
       });
 
-      request.log.info(`✅ Figurinha ${data.key.id} enviada para Chatwoot`);
+      // request.log.info(`✅ Figurinha ${data.key.id} enviada para Chatwoot`);
 
       fs.unlink(path.resolve('files', `${data.key.id}.webp`), (err) => {
         if (err) {
           console.error(`Erro ao deletar arquivo ${data.key.id}.webp:`, err);
         } else {
-          console.log(`Arquivo ${data.key.id}.webp deletado com sucesso.`);
+          // console.log(`Arquivo ${data.key.id}.webp deletado com sucesso.`);
         }
       });
     }
@@ -478,7 +478,7 @@ const handleEvolutionWebhook = async (
           if (err) {
             console.error(`Erro ao deletar arquivo ${imagePath}:`, err);
           } else {
-            console.log(`Arquivo ${imagePath} deletado com sucesso.`);
+            // console.log(`Arquivo ${imagePath} deletado com sucesso.`);
           }
         });
       } else {
@@ -492,7 +492,7 @@ const handleEvolutionWebhook = async (
         });
       }
 
-      request.log.info(`✅ Localização ${data.key.id} enviada para Chatwoot`);
+      // request.log.info(`✅ Localização ${data.key.id} enviada para Chatwoot`);
     }
 
     if (data.messageType === 'audioMessage') {
@@ -507,7 +507,7 @@ const handleEvolutionWebhook = async (
         form.append("content", header);
       }
 
-      request.log.info(`✅ Áudio ${data.key.id} enviando para Chatwoot`);
+      // request.log.info(`✅ Áudio ${data.key.id} enviando para Chatwoot`);
 
       await axios.post(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations/${conversation_id}/messages`, form, {
         headers: {
@@ -516,7 +516,7 @@ const handleEvolutionWebhook = async (
         },
       });
 
-      request.log.info(`✅ Áudio ${data.key.id} enviado para Chatwoot`);
+      // request.log.info(`✅ Áudio ${data.key.id} enviado para Chatwoot`);
     }
 
     if (data.messageType === 'contactMessage') {
@@ -536,7 +536,7 @@ const handleEvolutionWebhook = async (
         }
       });
 
-      request.log.info(`✅ Contato ${data.key.id} enviado para Chatwoot`);
+      // request.log.info(`✅ Contato ${data.key.id} enviado para Chatwoot`);
     }
 
     if (data.messageType === 'documentMessage') {
@@ -556,14 +556,14 @@ const handleEvolutionWebhook = async (
         },
       });
 
-      request.log.info(`✅ Documento ${data.key.id} enviado para Chatwoot`);
+      // request.log.info(`✅ Documento ${data.key.id} enviado para Chatwoot`);
     }
 
     reply.code(200).send({ status: "ok" });
   } catch (error: any) {
-    console.log(error);
+    console.error(error);
 
-    request.log.error("Erro ao processar webhook", error);
+    // request.log.error("Erro ao processar webhook", error);
     reply.code(500).send({ status: "error", message: "Erro interno" });
   }
 }
