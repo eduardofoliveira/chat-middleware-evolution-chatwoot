@@ -27,7 +27,7 @@ const handleEvolutionWebhook = async (
   reply: FastifyReply
 ) => {
   try {
-    const { account_id } = request.params as { account_id: number };
+    const { account_id, inbox_id } = request.params as { account_id: number; inbox_id: number };
 
     const body = request.body as {
       instance: any; event?: string; data?: any
@@ -207,7 +207,7 @@ const handleEvolutionWebhook = async (
     if (!conversation) {
       const conversationCreated = await axios.post(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations`, {
         source_id: cripto.randomUUID(),
-        inbox_id: 41,
+        inbox_id,
         contact_id: contact.id,
         status: 'open'
       }, {
