@@ -218,7 +218,7 @@ const handleEvolutionWebhook = async (
       console.log('Contato encontrado:', contact);
     }
 
-    const conversation = await findOpenByContact({ contact_id: contact.id, account_id: Number(account_id) });
+    const conversation = await findOpenByContact({ contact_id: contact.id, account_id: Number(account_id), inbox_id: Number(inbox_id) });
     if (!conversation) {
       const conversationCreated = await axios.post(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations`, {
         source_id: cripto.randomUUID(),

@@ -43,8 +43,8 @@ export default class Conversation {
     return db(Conversation.tableName).where({ id }).first()
   }
 
-  public static async findByContactId({ contact_id, account_id }: { contact_id: number, account_id: number }): Promise<IConversation | null> {
+  public static async findByContactId({ contact_id, account_id, inbox_id }: { contact_id: number, account_id: number, inbox_id: number }): Promise<IConversation | null> {
     const db = Db.getConnection()
-    return db(Conversation.tableName).where({ contact_id, account_id, status: 0 }).orderBy("id", "desc").first()
+    return db(Conversation.tableName).where({ contact_id, account_id, inbox_id, status: 0 }).orderBy("id", "desc").first()
   }
 }
