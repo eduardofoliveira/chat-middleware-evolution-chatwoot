@@ -17,7 +17,7 @@ import Fastify from "fastify";
 import evolutionRoutes from "./routes/evolutionRoutes.js";
 
 const server = Fastify({
-  logger: false,
+  logger: true,
 });
 server.register(cors, {
   origin: true
