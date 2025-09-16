@@ -44,6 +44,15 @@ const handleEvolutionWebhook = async (
 
     console.log({
       account_id,
+      inbox_id,
+      EVOLUTION_URL,
+      EVOLUTION_API_TOKEN,
+      CHATWOOT_URL,
+      API_TOKEN
+    })
+
+    console.log({
+      account_id,
       identifier: data?.key?.remoteJid,
       messageType: data?.messageType,
       event: body.event,
