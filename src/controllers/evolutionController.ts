@@ -332,10 +332,10 @@ const handleEvolutionWebhook = async (
         console.log('Conteúdo da mensagem:', content);
         await axios.post(`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations/${conversation_id}/messages`, {
           content: `${header}${content}`,
-          message_type: 'incoming',
-          metadata: {
-            author: "Testando"
-          }
+          message_type: 'incoming'
+          // metadata: {
+          //   author: "Testando"
+          // }
         }, {
           headers: {
             api_access_token: API_TOKEN,
