@@ -29,15 +29,6 @@ const handleEvolutionWebhook = async (
   try {
     const { account_id, inbox_id } = request.params as { account_id: number; inbox_id: number };
 
-    console.log({
-      account_id,
-      inbox_id,
-      EVOLUTION_URL,
-      EVOLUTION_API_TOKEN,
-      CHATWOOT_URL,
-      API_TOKEN
-    })
-
     const body = request.body as {
       instance: any; event?: string; data?: any
     };
@@ -46,6 +37,19 @@ const handleEvolutionWebhook = async (
     if (!data) {
       return reply.code(200).send();
     }
+
+    console.log({
+      account_id,
+      inbox_id,
+      EVOLUTION_URL,
+      EVOLUTION_API_TOKEN,
+      CHATWOOT_URL,
+      API_TOKEN,
+      EVENT: body.event,
+      instance: body.instance,
+      identifier: data?.key?.remoteJid,
+      messageType: data?.messageType,
+    })
 
     if (body.event !== 'messages.upsert') {
       return reply.status(200).send({ status: 'ignored', event: body.event });
