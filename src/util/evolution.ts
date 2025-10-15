@@ -1,75 +1,90 @@
+import crypto from "crypto";
 import fs from "fs";
 import fetch from "node-fetch";
-import crypto from "crypto";
 
 type MediaType = "image" | "video" | "audio" | "document";
 
 const getMediaKeys = (mediaKeyBase64: string, mediaType: MediaType) => {
-  const mediaKey = Buffer.from(mediaKeyBase64, "base64");
+	const mediaKey = Buffer.from(mediaKeyBase64, "base64");
 
-  const infoStrMap: Record<MediaType, string> = {
-    image: "WhatsApp Image Keys",
-    video: "WhatsApp Video Keys",
-    audio: "WhatsApp Audio Keys",
-    document: "WhatsApp Document Keys",
-  };
-  const infoStr = infoStrMap[mediaType];
+	const infoStrMap: Record<MediaType, string> = {
+		image: "WhatsApp Image Keys",
+		video: "WhatsApp Video Keys",
+		audio: "WhatsApp Audio Keys",
+		document: "WhatsApp Document Keys",
+	};
+	const infoStr = infoStrMap[mediaType];
 
-  // HKDF derivando 112 bytes
-  const expanded = crypto.hkdfSync(
-    "sha256",
-    mediaKey,
-    Buffer.alloc(32),       // salt vazio
-    Buffer.from(infoStr),   // info string
-    112
-  );
+	// HKDF derivando 112 bytes
+	const expanded = crypto.hkdfSync(
+		"sha256",
+		mediaKey,
+		Buffer.alloc(32), // salt vazio
+		Buffer.from(infoStr), // info string
+		112,
+	);
 
-  return {
-    iv: expanded.slice(0, 16),
-    cipherKey: expanded.slice(16, 48),
-    macKey: expanded.slice(48, 80),
-  };
-}
+	return {
+		iv: expanded.slice(0, 16),
+		cipherKey: expanded.slice(16, 48),
+		macKey: expanded.slice(48, 80),
+	};
+};
 
 /**
  * Descarrega e descriptografa mídia do WhatsApp
  * @param {object} mediaObj - Objeto com url, mediaKey, mimetype etc.
  * @param {string} outputPath - Caminho de destino no disco (ex: "./saida.jpg")
  */
-export async function salvarMidia(mediaObj: { url: string; mediaKey: string; mimetype: string }, outputPath: string) {
-  // 1. Detectar tipo de mídia pelo mimetype
-  let mediaType: MediaType = "document";
-  if (mediaObj.mimetype.startsWith("image/")) mediaType = "image";
-  else if (mediaObj.mimetype.startsWith("video/")) mediaType = "video";
-  else if (mediaObj.mimetype.startsWith("audio/")) mediaType = "audio";
+export async function salvarMidia(
+	mediaObj: { url: string; mediaKey: string; mimetype: string },
+	outputPath: string,
+) {
+	// 1. Detectar tipo de mídia pelo mimetype
+	let mediaType: MediaType = "document";
+	if (mediaObj.mimetype.startsWith("image/")) mediaType = "image";
+	else if (mediaObj.mimetype.startsWith("video/")) mediaType = "video";
+	else if (mediaObj.mimetype.startsWith("audio/")) mediaType = "audio";
 
-  // 2. Baixar o arquivo criptografado
-  const response = await fetch(mediaObj.url);
-  if (!response.ok) throw new Error(`Erro ao baixar mídia: ${response.statusText}`);
-  const encFile = Buffer.from(await response.arrayBuffer());
+	console.log(`⬇️ Baixando mídia do WhatsApp (${mediaType})...`);
+	console.log(`URL: ${mediaObj.url}`);
 
-  // 3. Gerar chaves
-  const keys = getMediaKeys(mediaObj.mediaKey, mediaType);
+	// 2. Baixar o arquivo criptografado
+	const response = await fetch(mediaObj.url);
+	if (!response.ok)
+		throw new Error(`Erro ao baixar mídia: ${response.statusText}`);
+	const encFile = Buffer.from(await response.arrayBuffer());
 
-  // 4. Remover os últimos 10 bytes (HMAC)
-  const fileData = encFile.slice(0, encFile.length - 10);
+	// 3. Gerar chaves
+	const keys = getMediaKeys(mediaObj.mediaKey, mediaType);
 
-  // 5. Descriptografar
-  const decipher = crypto.createDecipheriv(
-    "aes-256-cbc",
-    Buffer.from(keys.cipherKey),
-    Buffer.from(keys.iv)
-  );
-  const decrypted = Buffer.concat([decipher.update(fileData), decipher.final()]);
+	// 4. Remover os últimos 10 bytes (HMAC)
+	const fileData = encFile.slice(0, encFile.length - 10);
 
-  // 6. Salvar no disco
-  fs.writeFileSync(outputPath, decrypted);
-  console.log(`✅ Mídia descriptografada salva em: ${outputPath}`);
+	// 5. Descriptografar
+	const decipher = crypto.createDecipheriv(
+		"aes-256-cbc",
+		Buffer.from(keys.cipherKey),
+		Buffer.from(keys.iv),
+	);
+	const decrypted = Buffer.concat([
+		decipher.update(fileData),
+		decipher.final(),
+	]);
+
+	console.log({
+		outputPath,
+		decrypted,
+	});
+
+	// 6. Salvar no disco
+	fs.writeFileSync(outputPath, decrypted);
+	console.log(`✅ Mídia descriptografada salva em: ${outputPath}`);
 }
 
 export default {
-  salvarMidia,
-}
+	salvarMidia,
+};
 
 // const testar = async () => {
 //   const media = {
