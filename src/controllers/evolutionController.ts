@@ -698,6 +698,12 @@ const handleEvolutionWebhook = async (
 		}
 
 		if (data.messageType === "audioMessage") {
+			console.log("audioMessage");
+			console.log({
+				audioMessage: data.message.audioMessage,
+				path: path.resolve("files", `${data.key.id}.ogg`),
+			});
+
 			// mensagem de áudio
 			await salvarMidia(
 				data.message.audioMessage,
