@@ -55,6 +55,11 @@ export async function salvarMidia(
 		throw new Error(`Erro ao baixar mídia: ${response.statusText}`);
 	const encFile = Buffer.from(await response.arrayBuffer());
 
+	console.log({
+		mediaKey: mediaObj.mediaKey,
+		mediaType,
+	});
+
 	// 3. Gerar chaves
 	const keys = getMediaKeys(mediaObj.mediaKey, mediaType);
 
