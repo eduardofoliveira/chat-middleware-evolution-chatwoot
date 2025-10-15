@@ -43,6 +43,8 @@ const handleEvolutionWebhook = async (
 			return reply.code(200).send();
 		}
 
+		console.log(JSON.stringify(data, null, 2));
+
 		// console.log({
 		//   account_id,
 		//   inbox_id,
