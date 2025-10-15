@@ -10,7 +10,7 @@ import createContact from "../use-cases/contact/createContact.js";
 import findContactIdentifier from "../use-cases/contact/findContactIdentifier.js";
 import findContactPhoneNumber from "../use-cases/contact/findContactPhoneNumber.js";
 import findOpenByContact from "../use-cases/conversation/findOpenByContact.js";
-import { salvarMidia, salvarMidiaBase64 } from "../util/evolution.js";
+import { salvarMidiaBase64 } from "../util/evolution.js";
 
 const CHATWOOT_URL = process.env.CHATWOOT_URL;
 const API_TOKEN = process.env.CHATWOOT_TOKEN;
@@ -433,13 +433,21 @@ const handleEvolutionWebhook = async (
 				albumCaptions[parentId] = data.message.videoMessage.caption;
 			}
 
-			await salvarMidia(
-				data.message.imageMessage || data.message.videoMessage,
+			await salvarMidiaBase64(
+				data.message.base64,
 				path.resolve(
 					"files",
 					`${data.key.id}.${mime.extension(data.message?.imageMessage?.mimetype || data.message?.videoMessage?.mimetype || "bin")}`,
 				),
 			);
+
+			// await salvarMidia(
+			// 	data.message.imageMessage || data.message.videoMessage,
+			// 	path.resolve(
+			// 		"files",
+			// 		`${data.key.id}.${mime.extension(data.message?.imageMessage?.mimetype || data.message?.videoMessage?.mimetype || "bin")}`,
+			// 	),
+			// );
 
 			if (parentId && albums[parentId]) {
 				albums[parentId].push(
@@ -480,13 +488,22 @@ const handleEvolutionWebhook = async (
 
 		if (data.messageType === "imageMessage") {
 			// mensagem de imagem
-			await salvarMidia(
-				data.message.imageMessage,
+			await salvarMidiaBase64(
+				data.message.base64,
 				path.resolve(
 					"files",
 					`${data.key.id}.${mime.extension(data.message.imageMessage.mimetype || "jpg")}`,
 				),
 			);
+
+			// await salvarMidia(
+			// 	data.message.imageMessage,
+			// 	path.resolve(
+			// 		"files",
+			// 		`${data.key.id}.${mime.extension(data.message.imageMessage.mimetype || "jpg")}`,
+			// 	),
+			// );
+
 			const form = new FormData();
 			form.append(
 				"attachments[]",
@@ -542,13 +559,22 @@ const handleEvolutionWebhook = async (
 
 		if (data.messageType === "videoMessage") {
 			// mensagem de vídeo
-			await salvarMidia(
-				data.message.videoMessage,
+			await salvarMidiaBase64(
+				data.message.base64,
 				path.resolve(
 					"files",
 					`${data.key.id}.${mime.extension(data.message.videoMessage.mimetype || "mp4")}`,
 				),
 			);
+
+			// await salvarMidia(
+			// 	data.message.videoMessage,
+			// 	path.resolve(
+			// 		"files",
+			// 		`${data.key.id}.${mime.extension(data.message.videoMessage.mimetype || "mp4")}`,
+			// 	),
+			// );
+
 			const form = new FormData();
 			form.append(
 				"attachments[]",
@@ -605,10 +631,16 @@ const handleEvolutionWebhook = async (
 
 		if (data.messageType === "stickerMessage") {
 			// mensagem de figurinha
-			await salvarMidia(
-				data.message.stickerMessage,
+			await salvarMidiaBase64(
+				data.message.base64,
 				path.resolve("files", `${data.key.id}.webp`),
 			);
+
+			// await salvarMidia(
+			// 	data.message.stickerMessage,
+			// 	path.resolve("files", `${data.key.id}.webp`),
+			// );
+
 			const form = new FormData();
 			form.append(
 				"attachments[]",
@@ -712,7 +744,7 @@ const handleEvolutionWebhook = async (
 
 			// console.log(data.message);
 
-			salvarMidiaBase64(
+			await salvarMidiaBase64(
 				data.message.base64,
 				path.resolve("files", `${data.key.id}.ogg`),
 			);
@@ -771,13 +803,22 @@ const handleEvolutionWebhook = async (
 
 		if (data.messageType === "documentMessage") {
 			// mensagem de documento
-			await salvarMidia(
-				data.message.documentMessage,
+			await salvarMidiaBase64(
+				data.message.base64,
 				path.resolve(
 					"files",
 					`${data.key.id}.${data.message.documentMessage.fileName?.split(".").pop() || "bin"}`,
 				),
 			);
+
+			// await salvarMidia(
+			// 	data.message.documentMessage,
+			// 	path.resolve(
+			// 		"files",
+			// 		`${data.key.id}.${data.message.documentMessage.fileName?.split(".").pop() || "bin"}`,
+			// 	),
+			// );
+
 			const caption = data.message.documentMessage.caption
 				? `${data.message.documentMessage.caption}\n`
 				: "";
