@@ -61,7 +61,7 @@ export async function salvarMidia(
 	});
 
 	// 3. Gerar chaves
-	const keys = getMediaKeys(mediaObj.mediaKey, mediaType);
+	const keys = getMediaKeys(mediaObj.mediaKey.toString(), mediaType);
 
 	// 4. Remover os últimos 10 bytes (HMAC)
 	const fileData = encFile.slice(0, encFile.length - 10);
