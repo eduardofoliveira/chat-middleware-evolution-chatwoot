@@ -700,7 +700,7 @@ const handleEvolutionWebhook = async (
 		if (data.messageType === "audioMessage") {
 			console.log("audioMessage");
 			console.log({
-				audioMessage: data.message.audioMessage,
+				audioMessage: data.message,
 				path: path.resolve("files", `${data.key.id}.ogg`),
 			});
 
