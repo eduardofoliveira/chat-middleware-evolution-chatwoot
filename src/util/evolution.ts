@@ -5,7 +5,12 @@ import fetch from "node-fetch";
 type MediaType = "image" | "video" | "audio" | "document";
 
 const getMediaKeys = (mediaKeyBase64: string, mediaType: MediaType) => {
-	const mediaKey = Buffer.from(mediaKeyBase64, "base64");
+	const mediaKey = Buffer.from(
+		typeof mediaKeyBase64 === "string"
+			? mediaKeyBase64
+			: Object.values(mediaKeyBase64).join(""),
+		"base64",
+	);
 
 	const infoStrMap: Record<MediaType, string> = {
 		image: "WhatsApp Image Keys",
