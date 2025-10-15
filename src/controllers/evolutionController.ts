@@ -710,10 +710,10 @@ const handleEvolutionWebhook = async (
 			// 	path.resolve("files", `${data.key.id}.ogg`),
 			// );
 
-			console.log(data.message);
+			// console.log(data.message);
 
 			salvarMidiaBase64(
-				data.message.audioMessage.base64,
+				data.message.base64,
 				path.resolve("files", `${data.key.id}.ogg`),
 			);
 
