@@ -10,7 +10,7 @@ import createContact from "../use-cases/contact/createContact.js";
 import findContactIdentifier from "../use-cases/contact/findContactIdentifier.js";
 import findContactPhoneNumber from "../use-cases/contact/findContactPhoneNumber.js";
 import findOpenByContact from "../use-cases/conversation/findOpenByContact.js";
-import { salvarMidia } from "../util/evolution.js";
+import { salvarMidia, salvarMidiaBase64 } from "../util/evolution.js";
 
 const CHATWOOT_URL = process.env.CHATWOOT_URL;
 const API_TOKEN = process.env.CHATWOOT_TOKEN;
@@ -42,8 +42,6 @@ const handleEvolutionWebhook = async (
 		if (!data) {
 			return reply.code(200).send();
 		}
-
-		console.log(JSON.stringify(data, null, 2));
 
 		// console.log({
 		//   account_id,
@@ -701,16 +699,21 @@ const handleEvolutionWebhook = async (
 
 		if (data.messageType === "audioMessage") {
 			console.log("audioMessage");
-			console.log({
-				audioMessage: data.message,
-				path: path.resolve("files", `${data.key.id}.ogg`),
-			});
+			// console.log({
+			// 	audioMessage: data.message,
+			// 	path: path.resolve("files", `${data.key.id}.ogg`),
+			// });
 
 			// mensagem de áudio
-			await salvarMidia(
-				data.message.audioMessage,
+			// await salvarMidia(
+			// 	data.message.audioMessage,
+			// 	path.resolve("files", `${data.key.id}.ogg`),
+			// );
+			salvarMidiaBase64(
+				data.message.audioMessage.base64,
 				path.resolve("files", `${data.key.id}.ogg`),
 			);
+
 			const form = new FormData();
 			form.append(
 				"attachments[]",

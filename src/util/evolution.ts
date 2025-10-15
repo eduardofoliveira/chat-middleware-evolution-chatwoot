@@ -92,8 +92,15 @@ export async function salvarMidia(
 	console.log(`✅ Mídia descriptografada salva em: ${outputPath}`);
 }
 
+export async function salvarMidiaBase64(base64: string, outputPath: string) {
+	const buffer = Buffer.from(base64, "base64");
+	fs.writeFileSync(outputPath, buffer);
+	console.log(`✅ Mídia Base64 salva em: ${outputPath}`);
+}
+
 export default {
 	salvarMidia,
+	salvarMidiaBase64,
 };
 
 // const testar = async () => {
