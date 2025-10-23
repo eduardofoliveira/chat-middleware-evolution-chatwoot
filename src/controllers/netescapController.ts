@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import FormData from "form-data";
 
 import catalogo from "../catalogo.json" with { type: "json" };
 
@@ -126,30 +127,25 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 	if (
 		[".jpg", ".jpeg", ".png", ".gif"].some((ext) => body.message.includes(ext))
 	) {
-		const axiosGet = axios.get(body.message).catch(() => {
-			return reply
-				.status(400)
-				.send({ message: "URL de imagem inválida ou inacessível" });
-		});
-		const response = await axiosGet;
+		const formData = new FormData();
+		formData.append("message_type", "outgoing");
+		formData.append("private", true);
+		formData.append(
+			"attachments[]",
+			axios
+				.get(body.message, { responseType: "stream" })
+				.then((res) => res.data),
+		);
 
 		// Enviar para o Chawooot
 		const { data } = await axios.post(
 			`https://chatwoot.cloudcom.com.br/api/v1/accounts/${body.account_id}/conversations/${body.conversation_id}/messages`,
-			{
-				message_type: "outgoing",
-				private: true,
-				attachments: [
-					{
-						attachment_type: "image",
-						url: response.data.url,
-					},
-				],
-			},
+			formData,
 			{
 				headers: {
 					"Content-Type": "application/json",
 					api_access_token: process.env.CHATWOOT_TOKEN,
+					...formData.getHeaders(),
 				},
 			},
 		);
