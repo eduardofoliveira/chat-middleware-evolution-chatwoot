@@ -147,7 +147,7 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 		});
 
 		const formData = new FormData();
-		formData.append("message_type", "outgoing");
+		// formData.append("message_type", "outgoing");
 		formData.append("private", true);
 		formData.append("attachments[]", fs.createReadStream(fileName));
 
