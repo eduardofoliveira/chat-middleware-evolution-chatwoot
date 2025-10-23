@@ -1,3 +1,4 @@
+import axios from "axios";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import catalogo from "../catalogo.json" with { type: "json" };
@@ -115,4 +116,29 @@ const produto = async (request: FastifyRequest, reply: FastifyReply) => {
 	return reply.send(produtoFiltrado);
 };
 
-export default { montadoras, veiculos, modelos, produto };
+const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
+	const body = request.body as {
+		account_id: number;
+		conversation_id: number;
+		message: string;
+	};
+
+	const { data } = await axios.post(
+		`https://chatwoot.cloudcom.com.br/api/v1/accounts/${body.account_id}/conversations/${body.conversation_id}/messages`,
+		{
+			content: body.message,
+			message_type: "incoming",
+			private: true,
+		},
+		{
+			headers: {
+				"Content-Type": "application/json",
+				api_access_token: process.env.CHATWOOT_TOKEN,
+			},
+		},
+	);
+
+	return reply.send(data);
+};
+
+export default { montadoras, veiculos, modelos, produto, sendMessage };
