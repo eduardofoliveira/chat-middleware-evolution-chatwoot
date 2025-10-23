@@ -39,10 +39,6 @@ const handleEvolutionWebhook = async (
 		};
 		const data = body?.data;
 
-		if (!data) {
-			return reply.code(200).send();
-		}
-
 		console.log({
 			account_id,
 			inbox_id,
@@ -58,10 +54,6 @@ const handleEvolutionWebhook = async (
 
 		console.log(JSON.stringify(body, null, 2));
 
-		if (body.event !== "messages.upsert") {
-			return reply.status(200).send({ status: "ignored", event: body.event });
-		}
-
 		console.log({
 			account_id,
 			identifier: data?.key?.remoteJid,
@@ -69,6 +61,14 @@ const handleEvolutionWebhook = async (
 			event: body.event,
 			instance: body.instance,
 		});
+
+		if (!data) {
+			return reply.code(200).send();
+		}
+
+		if (body.event !== "messages.upsert") {
+			return reply.status(200).send({ status: "ignored", event: body.event });
+		}
 
 		const isGroup = data.key.remoteJid?.endsWith("@g.us");
 		let conversation_id = null;
