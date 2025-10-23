@@ -15,6 +15,7 @@ import Fastify from "fastify";
 // import { salvarMidia } from "./util/evolution.js";
 
 import evolutionRoutes from "./routes/evolutionRoutes.js";
+import netescapRoutes from "./routes/netescapRoutes.js";
 
 const server = Fastify({
 	logger: true,
@@ -28,6 +29,7 @@ server.register(cors, {
 // const albumCaptions: Record<string, string> = {};
 
 server.register(evolutionRoutes);
+server.register(netescapRoutes);
 
 const start = async () => {
 	try {
