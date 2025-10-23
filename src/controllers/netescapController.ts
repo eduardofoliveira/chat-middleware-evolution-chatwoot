@@ -183,7 +183,7 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 
 		const formData = new FormData();
 		// formData.append("message_type", "outgoing");
-		// formData.append("private", true);
+		formData.append("private", "true");
 		formData.append("attachments[]", fs.createReadStream(file));
 
 		// Enviar para o Chawooot
