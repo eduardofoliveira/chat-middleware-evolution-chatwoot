@@ -127,15 +127,12 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 	if (
 		[".jpg", ".jpeg", ".png", ".gif"].some((ext) => body.message.includes(ext))
 	) {
+		const res = await axios.get(body.message, { responseType: "stream" });
+
 		const formData = new FormData();
 		formData.append("message_type", "outgoing");
 		formData.append("private", true);
-		formData.append(
-			"attachments[]",
-			axios
-				.get(body.message, { responseType: "stream" })
-				.then((res) => res.data),
-		);
+		formData.append("attachments[]", res.data);
 
 		// Enviar para o Chawooot
 		const { data } = await axios.post(
