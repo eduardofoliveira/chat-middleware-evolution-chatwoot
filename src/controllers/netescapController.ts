@@ -1,8 +1,10 @@
 import fs from "node:fs";
+import path from "node:path";
+import stream from "node:stream";
+import util from "node:util";
 import axios from "axios";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import FormData from "form-data";
-
 import catalogo from "../catalogo.json" with { type: "json" };
 
 type CatalogoType = {
@@ -19,6 +21,32 @@ type CatalogoType = {
 };
 
 const typedCatalogo = catalogo as CatalogoType;
+
+const downloadFile = async ({
+	filePath,
+	fileName,
+}: {
+	filePath: string;
+	fileName: string;
+}) => {
+	// biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
+	return new Promise<{ file: string }>(async (resolve, reject) => {
+		try {
+			const pipeline = util.promisify(stream.pipeline);
+
+			const request = await axios.get(filePath, {
+				responseType: "stream",
+			});
+			await pipeline(
+				request.data,
+				fs.createWriteStream(path.resolve("files", fileName)),
+			);
+			resolve({ file: path.resolve("files", fileName) });
+		} catch (error) {
+			reject(error);
+		}
+	});
+};
 
 const montadoras = async (_: FastifyRequest, reply: FastifyReply) => {
 	return reply.send(
@@ -130,26 +158,31 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 	) {
 		// const res = await axios.get(body.message, { responseType: "stream" });
 		// Faça o download da imagem e salva em arquivo temporário
-		const res = await axios.get(body.message, { responseType: "stream" });
-		const fileName = `./files/${Date.now()}_${Math.random()
+		// const res = await axios.get(body.message, { responseType: "stream" });
+		const fileName = `${Date.now()}_${Math.random()
 			.toString(36)
 			.substring(7)}.jpg`;
-		const writer = fs.createWriteStream(fileName);
+		// const writer = fs.createWriteStream(fileName);
 
-		await new Promise((resolve, reject) => {
-			res.data.pipe(writer);
-			writer.on("finish", () => {
-				resolve(true);
-			});
-			writer.on("error", (error) => {
-				reject(error);
-			});
+		// await new Promise((resolve, reject) => {
+		// 	res.data.pipe(writer);
+		// 	writer.on("finish", () => {
+		// 		resolve(true);
+		// 	});
+		// 	writer.on("error", (error) => {
+		// 		reject(error);
+		// 	});
+		// });
+
+		const { file } = await downloadFile({
+			filePath: body.message,
+			fileName: path.basename(fileName),
 		});
 
 		const formData = new FormData();
 		// formData.append("message_type", "outgoing");
 		formData.append("private", true);
-		formData.append("attachments[]", fs.createReadStream(fileName));
+		formData.append("attachments[]", fs.createReadStream(file));
 
 		// Enviar para o Chawooot
 		const { data } = await axios.post(
@@ -165,7 +198,7 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 		);
 
 		// Deleta o arquivo temporário
-		fs.unlinkSync(fileName);
+		fs.unlinkSync(file);
 
 		return reply.send(data);
 	}
