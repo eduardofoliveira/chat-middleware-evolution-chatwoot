@@ -1,7 +1,7 @@
 import "dotenv/config";
-import cors from '@fastify/cors'
+import cors from "@fastify/cors";
 import Fastify from "fastify";
-// import axios from "axios"; 
+// import axios from "axios";
 // import path from "path";
 // import mime from 'mime-types'
 // import FormData from "form-data";
@@ -17,10 +17,10 @@ import Fastify from "fastify";
 import evolutionRoutes from "./routes/evolutionRoutes.js";
 
 const server = Fastify({
-  logger: true,
+	logger: true,
 });
 server.register(cors, {
-  origin: true
+	origin: true,
 });
 
 // const albums: Record<string, any[]> = {};
@@ -30,13 +30,18 @@ server.register(cors, {
 server.register(evolutionRoutes);
 
 const start = async () => {
-  try {
-    await server.listen({ port: Number(process.env.PORT) || 3001, host: "0.0.0.0" });
-    console.log(`🚀 Servidor rodando em http://localhost:${process.env.PORT || 3001}`);
-  } catch (err) {
-    server.log.error(err);
-    process.exit(1);
-  }
+	try {
+		await server.listen({
+			port: Number(process.env.PORT) || 3001,
+			host: "0.0.0.0",
+		});
+		console.log(
+			`🚀 Servidor rodando em http://localhost:${process.env.PORT || 3001}`,
+		);
+	} catch (err) {
+		server.log.error(err);
+		process.exit(1);
+	}
 };
 
 start();

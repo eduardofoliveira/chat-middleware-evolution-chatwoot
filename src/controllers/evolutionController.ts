@@ -43,32 +43,32 @@ const handleEvolutionWebhook = async (
 			return reply.code(200).send();
 		}
 
-		// console.log({
-		//   account_id,
-		//   inbox_id,
-		//   EVOLUTION_URL,
-		//   EVOLUTION_API_TOKEN,
-		//   CHATWOOT_URL,
-		//   API_TOKEN,
-		//   EVENT: body.event,
-		//   instance: body.instance,
-		//   identifier: data?.key?.remoteJid,
-		//   messageType: data?.messageType,
-		// })
+		console.log({
+			account_id,
+			inbox_id,
+			EVOLUTION_URL,
+			EVOLUTION_API_TOKEN,
+			CHATWOOT_URL,
+			API_TOKEN,
+			EVENT: body.event,
+			instance: body.instance,
+			identifier: data?.key?.remoteJid,
+			messageType: data?.messageType,
+		});
 
-		// console.log(JSON.stringify(body, null, 2));
+		console.log(JSON.stringify(body, null, 2));
 
 		if (body.event !== "messages.upsert") {
 			return reply.status(200).send({ status: "ignored", event: body.event });
 		}
 
-		// console.log({
-		//   account_id,
-		//   identifier: data?.key?.remoteJid,
-		//   messageType: data?.messageType,
-		//   event: body.event,
-		//   instance: body.instance,
-		// })
+		console.log({
+			account_id,
+			identifier: data?.key?.remoteJid,
+			messageType: data?.messageType,
+			event: body.event,
+			instance: body.instance,
+		});
 
 		const isGroup = data.key.remoteJid?.endsWith("@g.us");
 		let conversation_id = null;
