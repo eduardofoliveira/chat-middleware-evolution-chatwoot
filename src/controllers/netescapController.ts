@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import axios from "axios";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import FormData from "form-data";
@@ -127,12 +128,28 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 	if (
 		[".jpg", ".jpeg", ".png", ".gif"].some((ext) => body.message.includes(ext))
 	) {
+		// const res = await axios.get(body.message, { responseType: "stream" });
+		// Faça o download da imagem e salva em arquivo temporário
 		const res = await axios.get(body.message, { responseType: "stream" });
+		const fileName = `./temp/${Date.now()}_${Math.random()
+			.toString(36)
+			.substring(7)}.jpg`;
+		const writer = fs.createWriteStream(fileName);
+
+		await new Promise((resolve, reject) => {
+			res.data.pipe(writer);
+			writer.on("finish", () => {
+				resolve(true);
+			});
+			writer.on("error", (error) => {
+				reject(error);
+			});
+		});
 
 		const formData = new FormData();
 		formData.append("message_type", "outgoing");
 		formData.append("private", true);
-		formData.append("attachments[]", res.data);
+		formData.append("attachments[]", fs.createReadStream(fileName));
 
 		// Enviar para o Chawooot
 		const { data } = await axios.post(
@@ -146,6 +163,9 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 				},
 			},
 		);
+
+		// Deleta o arquivo temporário
+		fs.unlinkSync(fileName);
 
 		return reply.send(data);
 	}
