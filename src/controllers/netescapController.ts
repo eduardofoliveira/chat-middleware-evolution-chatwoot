@@ -123,6 +123,34 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 		message: string;
 	};
 
+	if (
+		[".jpg", ".jpeg", ".png", ".gif"].some((ext) => body.message.includes(ext))
+	) {
+		const axiosGet = axios.get(body.message).catch(() => {
+			return reply
+				.status(400)
+				.send({ message: "URL de imagem inválida ou inacessível" });
+		});
+		const response = await axiosGet;
+
+		// Enviar para o Chawooot
+		const { data } = await axios.post(
+			`https://chatwoot.cloudcom.com.br/api/v1/accounts/${body.account_id}/conversations/${body.conversation_id}/messages`,
+			{
+				message_type: "outgoing",
+				private: true,
+				attachments: [
+					{
+						attachment_type: "image",
+						url: response.data.url,
+					},
+				],
+			},
+		);
+
+		return reply.send(data);
+	}
+
 	const { data } = await axios.post(
 		`https://chatwoot.cloudcom.com.br/api/v1/accounts/${body.account_id}/conversations/${body.conversation_id}/messages`,
 		{
