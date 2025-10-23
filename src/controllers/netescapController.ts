@@ -127,7 +127,7 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 		`https://chatwoot.cloudcom.com.br/api/v1/accounts/${body.account_id}/conversations/${body.conversation_id}/messages`,
 		{
 			content: body.message,
-			message_type: "incoming",
+			message_type: "outgoing",
 			private: true,
 		},
 		{
