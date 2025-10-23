@@ -7,5 +7,5 @@ export default async function evolutionRoutes(fastify: FastifyInstance) {
 	fastify.get("/netscape/veiculos", netescapController.veiculos);
 	fastify.get("/netscape/modelos", netescapController.modelos);
 	fastify.get("/netscape/produto", netescapController.produto);
-	fastify.get("/netscape/send", netescapController.sendMessage);
+	fastify.post("/netscape/send", netescapController.sendMessage);
 }
