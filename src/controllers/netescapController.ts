@@ -146,6 +146,12 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 					},
 				],
 			},
+			{
+				headers: {
+					"Content-Type": "application/json",
+					api_access_token: process.env.CHATWOOT_TOKEN,
+				},
+			},
 		);
 
 		return reply.send(data);
