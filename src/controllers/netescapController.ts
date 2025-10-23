@@ -131,7 +131,7 @@ const sendMessage = async (request: FastifyRequest, reply: FastifyReply) => {
 		// const res = await axios.get(body.message, { responseType: "stream" });
 		// Faça o download da imagem e salva em arquivo temporário
 		const res = await axios.get(body.message, { responseType: "stream" });
-		const fileName = `./temp/${Date.now()}_${Math.random()
+		const fileName = `./files/${Date.now()}_${Math.random()
 			.toString(36)
 			.substring(7)}.jpg`;
 		const writer = fs.createWriteStream(fileName);
