@@ -166,6 +166,15 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 	});
 };
 
+async function jira(req: FastifyRequest, reply: FastifyReply) {
+	const { body, query, params, headers } = req;
+
+	console.log(JSON.stringify({ body, query, params, headers }, null, 2));
+
+	return reply.send({ message: "Jira webhook received" });
+}
+
 export default {
 	index,
+	jira,
 };
