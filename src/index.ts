@@ -1,6 +1,7 @@
 import "dotenv/config";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
+
 // import axios from "axios";
 // import path from "path";
 // import mime from 'mime-types'
@@ -14,6 +15,7 @@ import Fastify from "fastify";
 
 // import { salvarMidia } from "./util/evolution.js";
 
+import botRoutes from "./routes/botRoutes.js";
 import evolutionRoutes from "./routes/evolutionRoutes.js";
 import netescapRoutes from "./routes/netescapRoutes.js";
 
@@ -30,6 +32,7 @@ server.register(cors, {
 
 server.register(evolutionRoutes);
 server.register(netescapRoutes);
+server.register(botRoutes);
 
 const start = async () => {
 	try {
