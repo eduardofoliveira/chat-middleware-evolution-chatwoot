@@ -2,6 +2,8 @@ import axios from "axios";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 const TokenBotDataCosmos = "2h9w9JKmSRHL9E9433fLscN6";
+const CHATWOOT_URL = process.env.CHATWOOT_URL;
+// const API_TOKEN = process.env.CHATWOOT_TOKEN;
 
 const index = async (request: FastifyRequest, reply: FastifyReply) => {
 	const { account_id, bot_name } = request.params as {
@@ -168,6 +170,38 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 
 async function jira(req: FastifyRequest, reply: FastifyReply) {
 	const { body, query, params, headers } = req;
+	const { webhookEvent, comment, issue } = body as {
+		webhookEvent: string;
+		comment: { body: string };
+		issue: { id: string };
+	};
+	const { id: issueId } = issue as { id: string };
+	const { body: commentBody } = comment as { body: string };
+
+	const relacao: Record<
+		string,
+		{ account_id: number; conversation_id: number }
+	> = {
+		"10000": {
+			account_id: 1,
+			conversation_id: 2100,
+		},
+	};
+
+	if (webhookEvent === "comment_created" && relacao[issueId]) {
+		await axios.post(
+			`${CHATWOOT_URL}/api/v1/accounts/${relacao[issueId].account_id}/conversations/${relacao[issueId].conversation_id}/messages`,
+			{
+				content: commentBody,
+				message_type: "incoming",
+			},
+			{
+				headers: {
+					api_access_token: TokenBotDataCosmos,
+				},
+			},
+		);
+	}
 
 	console.log(JSON.stringify({ body, query, params, headers }, null, 2));
 
