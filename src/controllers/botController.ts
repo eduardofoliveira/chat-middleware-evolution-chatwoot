@@ -188,6 +188,17 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 		},
 	};
 
+	if (commentBody.includes("Nome:") && commentBody.includes("Numero:")) {
+		return reply.send({ message: "Jira webhook received" });
+	}
+
+	console.log({
+		webhookEvent,
+		relacao,
+		issueId,
+		encontrado: relacao[issueId],
+	});
+
 	if (webhookEvent === "comment_created" && relacao[issueId]) {
 		await axios.post(
 			`${CHATWOOT_URL}/api/v1/accounts/${relacao[issueId].account_id}/conversations/${relacao[issueId].conversation_id}/messages`,
@@ -203,7 +214,7 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 		);
 	}
 
-	console.log(JSON.stringify({ body, query, params, headers }, null, 2));
+	// console.log(JSON.stringify({ body, query, params, headers }, null, 2));
 
 	return reply.send({ message: "Jira webhook received" });
 }
