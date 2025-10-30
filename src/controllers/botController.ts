@@ -204,7 +204,7 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 			`${CHATWOOT_URL}/api/v1/accounts/${relacao[issueId].account_id}/conversations/${relacao[issueId].conversation_id}/messages`,
 			{
 				content: commentBody,
-				message_type: "incoming",
+				message_type: "outgoing",
 			},
 			{
 				headers: {
