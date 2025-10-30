@@ -28,6 +28,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 		sender: {
 			id: number;
 			name: string;
+			phone_number: string;
 		};
 		event: string;
 		conversation?: {
@@ -68,7 +69,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 										text: "Numero: ",
 										marks: [{ type: "strong" }],
 									},
-									{ type: "text", text: `${sender.id}\r\n\r\n` },
+									{ type: "text", text: `${sender.phone_number}\r\n\r\n` },
 									{
 										type: "text",
 										text: "Mensagem: \r\n",
@@ -119,7 +120,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 										text: "Numero: ",
 										marks: [{ type: "strong" }],
 									},
-									{ type: "text", text: `${sender.id}\r\n\r\n` },
+									{ type: "text", text: `${sender.phone_number}\r\n\r\n` },
 									{
 										type: "text",
 										text: "Mensagem: \r\n",
