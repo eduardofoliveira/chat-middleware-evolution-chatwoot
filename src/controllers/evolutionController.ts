@@ -39,6 +39,9 @@ const handleEvolutionWebhook = async (
 		};
 		const data = body?.data;
 
+		console.log('handleEvolutionWebhook')
+		console.log(JSON.stringify(body, null, 2))
+
 		// console.log({
 		// 	account_id,
 		// 	inbox_id,
@@ -420,7 +423,7 @@ const handleEvolutionWebhook = async (
 		if (
 			["imageMessage", "videoMessage"].includes(data.messageType) &&
 			data.message?.messageContextInfo?.messageAssociation?.associationType ===
-				"MEDIA_ALBUM"
+			"MEDIA_ALBUM"
 		) {
 			const parentId =
 				data.message?.messageContextInfo?.messageAssociation?.parentMessageKey
