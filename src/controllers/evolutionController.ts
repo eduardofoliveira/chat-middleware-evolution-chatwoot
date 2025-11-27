@@ -87,6 +87,14 @@ const handleEvolutionWebhook = async (
 			remoteJid = data.key.remoteJidAlt;
 		}
 
+		if (remoteJid === '') {
+			console.log({
+				remoteJid,
+				message: 'Não foi possível determinar o remoteJid correto',
+			})
+			remoteJid = data.key.remoteJid;
+		}
+
 		const isGroup = remoteJid?.endsWith("@g.us");
 		let conversation_id = null;
 		let contact = await findContactIdentifier({
