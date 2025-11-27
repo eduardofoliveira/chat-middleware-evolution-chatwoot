@@ -74,16 +74,16 @@ const handleEvolutionWebhook = async (
 		}
 
 		let remoteJid = ''
-		if (data.key.remoteJid.includes('whatsapp.net')) {
+		if (data.key?.remoteJid.includes('whatsapp.net')) {
 			remoteJid = data.key.remoteJid;
 		}
-		if (data.key.remoteJidAlt.includes('whatsapp.net')) {
+		if (data.key?.remoteJidAlt.includes('whatsapp.net')) {
 			remoteJid = data.key.remoteJidAlt;
 		}
-		if (data.key.remoteJid.includes('@g.us')) {
+		if (data.key?.remoteJid.includes('@g.us')) {
 			remoteJid = data.key.remoteJid;
 		}
-		if (data.key.remoteJidAlt.includes('@g.us')) {
+		if (data.key?.remoteJidAlt.includes('@g.us')) {
 			remoteJid = data.key.remoteJidAlt;
 		}
 
