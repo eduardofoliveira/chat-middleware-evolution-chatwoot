@@ -73,38 +73,52 @@ const handleEvolutionWebhook = async (
 			return reply.status(200).send({ status: "ignored", event: body.event });
 		}
 
-		const isGroup = data.key.remoteJid?.endsWith("@g.us");
+		let remoteJid = ''
+		if (data.key.remoteJid.includes('whatsapp.net')) {
+			remoteJid = data.key.remoteJid;
+		}
+		if (data.key.remoteJidAlt.includes('whatsapp.net')) {
+			remoteJid = data.key.remoteJidAlt;
+		}
+		if (data.key.remoteJid.includes('@g.us')) {
+			remoteJid = data.key.remoteJid;
+		}
+		if (data.key.remoteJidAlt.includes('@g.us')) {
+			remoteJid = data.key.remoteJidAlt;
+		}
+
+		const isGroup = remoteJid?.endsWith("@g.us");
 		let conversation_id = null;
 		let contact = await findContactIdentifier({
-			identifier: data.key.remoteJid,
+			identifier: remoteJid,
 			account_id: Number(account_id),
 		});
 		if (!contact && !isGroup) {
 			contact = await findContactPhoneNumber({
-				phone_number: `+${/(.*)@/.exec(data.key.remoteJid)?.[1] || data.key.remoteJid}`,
+				phone_number: `+${/(.*)@/.exec(remoteJid)?.[1] || remoteJid}`,
 				account_id: Number(account_id),
 			});
 			if (!contact) {
-				console.log(`Criando contato para ${data.key.remoteJid}`);
+				console.log(`Criando contato para ${remoteJid}`);
 
 				console.log({
-					identifier: data.key.remoteJid,
+					identifier: remoteJid,
 					account_id: Number(account_id),
 					name: data.pushName || "Sem Nome",
-					phone_number: `+${/(.*)@/.exec(data.key.remoteJid)?.[1] || data.key.remoteJid}`,
-					country_code: /(.*)@/.exec(data.key.remoteJid)?.[1]?.startsWith("55")
+					phone_number: `+${/(.*)@/.exec(remoteJid)?.[1] || remoteJid}`,
+					country_code: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
 						? "Brazil"
 						: "",
 					custom_attributes: JSON.stringify({ source: "evolution" }),
 					additional_attributes: JSON.stringify({
 						city: "",
-						country: /(.*)@/.exec(data.key.remoteJid)?.[1]?.startsWith("55")
+						country: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
 							? "Brazil"
 							: "",
 						description: "",
 						company_name: "",
 						country_code: /(.*)@/
-							.exec(data.key.remoteJid)?.[1]
+							.exec(remoteJid)?.[1]
 							?.startsWith("55")
 							? "BR"
 							: "",
@@ -119,23 +133,23 @@ const handleEvolutionWebhook = async (
 				});
 
 				await createContact({
-					identifier: data.key.remoteJid,
+					identifier: remoteJid,
 					account_id: Number(account_id),
 					name: data.pushName || "Sem Nome",
-					phone_number: `+${/(.*)@/.exec(data.key.remoteJid)?.[1] || data.key.remoteJid}`,
-					country_code: /(.*)@/.exec(data.key.remoteJid)?.[1]?.startsWith("55")
+					phone_number: `+${/(.*)@/.exec(remoteJid)?.[1] || remoteJid}`,
+					country_code: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
 						? "Brazil"
 						: "",
 					custom_attributes: JSON.stringify({ source: "evolution" }),
 					additional_attributes: JSON.stringify({
 						city: "",
-						country: /(.*)@/.exec(data.key.remoteJid)?.[1]?.startsWith("55")
+						country: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
 							? "Brazil"
 							: "",
 						description: "",
 						company_name: "",
 						country_code: /(.*)@/
-							.exec(data.key.remoteJid)?.[1]
+							.exec(remoteJid)?.[1]
 							?.startsWith("55")
 							? "BR"
 							: "",
@@ -150,14 +164,14 @@ const handleEvolutionWebhook = async (
 				});
 
 				contact = await findContactIdentifier({
-					identifier: data.key.remoteJid,
+					identifier: remoteJid,
 					account_id: Number(account_id),
 				});
 
 				const profileData = await axios.post(
 					`${EVOLUTION_URL}/chat/fetchProfile/${body.instance}`,
 					{
-						number: /(.*)@/.exec(data.key.remoteJid)?.[1],
+						number: /(.*)@/.exec(remoteJid)?.[1],
 					},
 					{
 						headers: {
@@ -179,20 +193,20 @@ const handleEvolutionWebhook = async (
 					// console.log('Foto do contato baixada, tamanho:', avatarBuffer.length);
 					// save file into /files
 					fs.writeFileSync(
-						path.resolve("files", `${data.key.remoteJid}.jpg`),
+						path.resolve("files", `${remoteJid}.jpg`),
 						avatarBuffer,
 					);
-					// console.log('Foto do contato salva em:', path.resolve('files', `${data.key.remoteJid}.jpg`));
+					// console.log('Foto do contato salva em:', path.resolve('files', `${remoteJid}.jpg`));
 
 					const form = new FormData();
 					form.append(
 						"avatar",
 						fs.createReadStream(
-							path.resolve("files", `${data.key.remoteJid}.jpg`),
+							path.resolve("files", `${remoteJid}.jpg`),
 						),
 					);
 
-					// request.log.info(`✅ Foto do contato ${data.key.remoteJid} enviando para o Chatwoot`);
+					// request.log.info(`✅ Foto do contato ${remoteJid} enviando para o Chatwoot`);
 
 					await axios.put(
 						`${CHATWOOT_URL}/api/v1/accounts/${account_id}/contacts/${contact?.id}`,
@@ -205,17 +219,17 @@ const handleEvolutionWebhook = async (
 						},
 					);
 
-					// console.log(`Foto do contato ${data.key.remoteJid} enviada para o Chatwoot`);
+					// console.log(`Foto do contato ${remoteJid} enviada para o Chatwoot`);
 					fs.unlink(
-						path.resolve("files", `${data.key.remoteJid}.jpg`),
+						path.resolve("files", `${remoteJid}.jpg`),
 						(err) => {
 							if (err) {
 								console.error(
-									`Erro ao deletar arquivo ${data.key.remoteJid}.jpg:`,
+									`Erro ao deletar arquivo ${remoteJid}.jpg:`,
 									err,
 								);
 							} else {
-								// console.log(`Arquivo ${data.key.remoteJid}.jpg deletado com sucesso.`);
+								// console.log(`Arquivo ${remoteJid}.jpg deletado com sucesso.`);
 							}
 						},
 					);
@@ -226,7 +240,7 @@ const handleEvolutionWebhook = async (
 				`${EVOLUTION_URL}/group/findGroupInfos/${body.instance}`,
 				{
 					params: {
-						groupJid: data.key.remoteJid,
+						groupJid: remoteJid,
 					},
 					headers: {
 						apikey: EVOLUTION_API_TOKEN,
@@ -241,19 +255,19 @@ const handleEvolutionWebhook = async (
 
 			// criar contato do grupo
 			await createContact({
-				identifier: data.key.remoteJid,
+				identifier: remoteJid,
 				account_id: Number(account_id),
 				name: `${groupInfo.data.subject} (Grupo)`,
 				phone_number: "",
 				custom_attributes: JSON.stringify({ source: "evolution" }),
 				additional_attributes: JSON.stringify({
 					city: "",
-					country: /(.*)@/.exec(data.key.remoteJid)?.[1]?.startsWith("55")
+					country: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
 						? "Brazil"
 						: "",
 					description: "",
 					company_name: "",
-					country_code: /(.*)@/.exec(data.key.remoteJid)?.[1]?.startsWith("55")
+					country_code: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
 						? "BR"
 						: "",
 					social_profiles: {
@@ -267,7 +281,7 @@ const handleEvolutionWebhook = async (
 			});
 
 			contact = await findContactIdentifier({
-				identifier: data.key.remoteJid,
+				identifier: remoteJid,
 				account_id: Number(account_id),
 			});
 
@@ -284,20 +298,20 @@ const handleEvolutionWebhook = async (
 				// console.log('Foto do grupo baixada, tamanho:', avatarBuffer.length);
 				// save file into /files
 				fs.writeFileSync(
-					path.resolve("files", `${data.key.remoteJid}.jpg`),
+					path.resolve("files", `${remoteJid}.jpg`),
 					avatarBuffer,
 				);
-				// console.log('Foto do grupo salva em:', path.resolve('files', `${data.key.remoteJid}.jpg`));
+				// console.log('Foto do grupo salva em:', path.resolve('files', `${remoteJid}.jpg`));
 
 				const form = new FormData();
 				form.append(
 					"avatar",
 					fs.createReadStream(
-						path.resolve("files", `${data.key.remoteJid}.jpg`),
+						path.resolve("files", `${remoteJid}.jpg`),
 					),
 				);
 
-				// request.log.info(`✅ Foto do grupo ${data.key.remoteJid} enviando para o Chatwoot`);
+				// request.log.info(`✅ Foto do grupo ${remoteJid} enviando para o Chatwoot`);
 
 				await axios.put(
 					`${CHATWOOT_URL}/api/v1/accounts/${account_id}/contacts/${contact?.id}`,
@@ -310,15 +324,15 @@ const handleEvolutionWebhook = async (
 					},
 				);
 
-				// console.log(`Foto do grupo ${data.key.remoteJid} enviada para o Chatwoot`);
-				fs.unlink(path.resolve("files", `${data.key.remoteJid}.jpg`), (err) => {
+				// console.log(`Foto do grupo ${remoteJid} enviada para o Chatwoot`);
+				fs.unlink(path.resolve("files", `${remoteJid}.jpg`), (err) => {
 					if (err) {
 						console.error(
-							`Erro ao deletar arquivo ${data.key.remoteJid}.jpg:`,
+							`Erro ao deletar arquivo ${remoteJid}.jpg:`,
 							err,
 						);
 					} else {
-						// console.log(`Arquivo ${data.key.remoteJid}.jpg deletado com sucesso.`);
+						// console.log(`Arquivo ${remoteJid}.jpg deletado com sucesso.`);
 					}
 				});
 			}
