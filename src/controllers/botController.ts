@@ -46,8 +46,8 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 	if (
 		event === "message_created" &&
 		message_type === "incoming" &&
-		inboxName === "1135880866" &&
-		inboxId === 49
+		inboxName === "1137115006" &&
+		inboxId === 41
 	) {
 		if (content_type === "text" && content) {
 			console.log("Mensagem de texto recebida no bot Cosmos:");
@@ -184,7 +184,7 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 	> = {
 		"10000": {
 			account_id: 1,
-			conversation_id: 2100,
+			conversation_id: 2263,
 		},
 	};
 
