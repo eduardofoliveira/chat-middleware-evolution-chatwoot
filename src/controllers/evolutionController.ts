@@ -39,8 +39,8 @@ const handleEvolutionWebhook = async (
 		};
 		const data = body?.data;
 
-		console.log('handleEvolutionWebhook')
-		console.log(JSON.stringify(body, null, 2))
+		console.log("handleEvolutionWebhook");
+		console.log(JSON.stringify(body, null, 2));
 
 		// console.log({
 		// 	account_id,
@@ -73,25 +73,25 @@ const handleEvolutionWebhook = async (
 			return reply.status(200).send({ status: "ignored", event: body.event });
 		}
 
-		let remoteJid = ''
-		if (data.key?.remoteJid.includes('whatsapp.net')) {
+		let remoteJid = "";
+		if (data.key?.remoteJid.includes("whatsapp.net")) {
 			remoteJid = data.key.remoteJid;
 		}
-		if (data.key?.remoteJidAlt?.includes('whatsapp.net')) {
+		if (data.key?.remoteJidAlt?.includes("whatsapp.net")) {
 			remoteJid = data.key.remoteJidAlt;
 		}
-		if (data.key?.remoteJid?.includes('@g.us')) {
+		if (data.key?.remoteJid?.includes("@g.us")) {
 			remoteJid = data.key.remoteJid;
 		}
-		if (data.key?.remoteJidAlt?.includes('@g.us')) {
+		if (data.key?.remoteJidAlt?.includes("@g.us")) {
 			remoteJid = data.key.remoteJidAlt;
 		}
 
-		if (remoteJid === '') {
+		if (remoteJid === "") {
 			console.log({
 				remoteJid,
-				message: 'Não foi possível determinar o remoteJid correto',
-			})
+				message: "Não foi possível determinar o remoteJid correto",
+			});
 			remoteJid = data.key.remoteJid;
 		}
 
@@ -125,9 +125,7 @@ const handleEvolutionWebhook = async (
 							: "",
 						description: "",
 						company_name: "",
-						country_code: /(.*)@/
-							.exec(remoteJid)?.[1]
-							?.startsWith("55")
+						country_code: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
 							? "BR"
 							: "",
 						social_profiles: {
@@ -156,9 +154,7 @@ const handleEvolutionWebhook = async (
 							: "",
 						description: "",
 						company_name: "",
-						country_code: /(.*)@/
-							.exec(remoteJid)?.[1]
-							?.startsWith("55")
+						country_code: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
 							? "BR"
 							: "",
 						social_profiles: {
@@ -209,9 +205,7 @@ const handleEvolutionWebhook = async (
 					const form = new FormData();
 					form.append(
 						"avatar",
-						fs.createReadStream(
-							path.resolve("files", `${remoteJid}.jpg`),
-						),
+						fs.createReadStream(path.resolve("files", `${remoteJid}.jpg`)),
 					);
 
 					// request.log.info(`✅ Foto do contato ${remoteJid} enviando para o Chatwoot`);
@@ -228,19 +222,13 @@ const handleEvolutionWebhook = async (
 					);
 
 					// console.log(`Foto do contato ${remoteJid} enviada para o Chatwoot`);
-					fs.unlink(
-						path.resolve("files", `${remoteJid}.jpg`),
-						(err) => {
-							if (err) {
-								console.error(
-									`Erro ao deletar arquivo ${remoteJid}.jpg:`,
-									err,
-								);
-							} else {
-								// console.log(`Arquivo ${remoteJid}.jpg deletado com sucesso.`);
-							}
-						},
-					);
+					fs.unlink(path.resolve("files", `${remoteJid}.jpg`), (err) => {
+						if (err) {
+							console.error(`Erro ao deletar arquivo ${remoteJid}.jpg:`, err);
+						} else {
+							// console.log(`Arquivo ${remoteJid}.jpg deletado com sucesso.`);
+						}
+					});
 				}
 			}
 		} else if (!contact && isGroup) {
@@ -314,9 +302,7 @@ const handleEvolutionWebhook = async (
 				const form = new FormData();
 				form.append(
 					"avatar",
-					fs.createReadStream(
-						path.resolve("files", `${remoteJid}.jpg`),
-					),
+					fs.createReadStream(path.resolve("files", `${remoteJid}.jpg`)),
 				);
 
 				// request.log.info(`✅ Foto do grupo ${remoteJid} enviando para o Chatwoot`);
@@ -335,10 +321,7 @@ const handleEvolutionWebhook = async (
 				// console.log(`Foto do grupo ${remoteJid} enviada para o Chatwoot`);
 				fs.unlink(path.resolve("files", `${remoteJid}.jpg`), (err) => {
 					if (err) {
-						console.error(
-							`Erro ao deletar arquivo ${remoteJid}.jpg:`,
-							err,
-						);
+						console.error(`Erro ao deletar arquivo ${remoteJid}.jpg:`, err);
 					} else {
 						// console.log(`Arquivo ${remoteJid}.jpg deletado com sucesso.`);
 					}
@@ -360,6 +343,18 @@ const handleEvolutionWebhook = async (
 					source_id: cripto.randomUUID(),
 					inbox_id,
 					contact_id: contact.id,
+					status: "open",
+				},
+				{
+					headers: {
+						api_access_token: API_TOKEN,
+					},
+				},
+			);
+
+			await axios.post(
+				`${CHATWOOT_URL}/api/v1/accounts/${account_id}/conversations/${conversationCreated.data.id}/toggle_status`,
+				{
 					status: "open",
 				},
 				{
@@ -445,7 +440,7 @@ const handleEvolutionWebhook = async (
 		if (
 			["imageMessage", "videoMessage"].includes(data.messageType) &&
 			data.message?.messageContextInfo?.messageAssociation?.associationType ===
-			"MEDIA_ALBUM"
+				"MEDIA_ALBUM"
 		) {
 			const parentId =
 				data.message?.messageContextInfo?.messageAssociation?.parentMessageKey
