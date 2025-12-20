@@ -8,6 +8,7 @@ const execute = async ({
 	sender_name,
 	phone_number,
 	step,
+	issue,
 }: {
 	conversation_id: number;
 	fk_id_jira: number;
@@ -16,6 +17,7 @@ const execute = async ({
 	sender_name: string;
 	phone_number: string;
 	step: number;
+	issue: number;
 }) => {
 	const conversation = await CloudJiraConversation.create({
 		conversation_id,
@@ -25,6 +27,7 @@ const execute = async ({
 		sender_name,
 		phone_number,
 		step,
+		issue,
 	});
 
 	return conversation;

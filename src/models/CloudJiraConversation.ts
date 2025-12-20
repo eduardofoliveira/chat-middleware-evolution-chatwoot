@@ -50,6 +50,7 @@ export default class CloudJiraConversation {
 		phone_number,
 		email,
 		step,
+		issue,
 	}: {
 		fk_id_jira: number;
 		conversation_id: number;
@@ -58,6 +59,7 @@ export default class CloudJiraConversation {
 		phone_number: string;
 		email: string | null;
 		step: number;
+		issue: number;
 	}): Promise<ICloudJiraConversation> {
 		const db = Db.getConnection();
 		const [newRecord] = await db(CloudJiraConversation.tableName)
@@ -69,6 +71,7 @@ export default class CloudJiraConversation {
 				phone_number,
 				email,
 				step,
+				issue,
 			})
 			.returning("*");
 		return newRecord;
