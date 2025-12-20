@@ -76,33 +76,35 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 	};
 	const { id: inboxId, name: inboxName } = inbox;
 
-	const botExists = await findBot({ account_id, bot_name });
-	if (!botExists) {
-		// Encerra fluxo se o bot não for encontrado
-		return reply.status(200).send({ message: "Bot not found" });
-	}
+	if (message_type === "incoming") {
+		const botExists = await findBot({ account_id, bot_name });
+		if (!botExists) {
+			// Encerra fluxo se o bot não for encontrado
+			return reply.status(200).send({ message: "Bot not found" });
+		}
 
-	const jiraExists = await findJira({ bot_id: botExists.id });
-	await deleteOldConversations();
+		const jiraExists = await findJira({ bot_id: botExists.id });
+		await deleteOldConversations();
 
-	const conversationJira = await getJiraConversation({
-		conversation_id: conversation.id,
-		fk_id_jira: jiraExists.id,
-	});
-
-	if (!conversationJira) {
-		const firstMessage = await getFirstJiraMessage({
+		const conversationJira = await getJiraConversation({
+			conversation_id: conversation.id,
 			fk_id_jira: jiraExists.id,
 		});
 
-		console.log("First Message:", firstMessage);
+		if (!conversationJira) {
+			const firstMessage = await getFirstJiraMessage({
+				fk_id_jira: jiraExists.id,
+			});
 
-		await sendMessageToChatwoot({
-			account_id,
-			conversation_id: conversation.id,
-			content: firstMessage.message,
-			token: botExists.bot_token,
-		});
+			console.log("First Message:", firstMessage);
+
+			await sendMessageToChatwoot({
+				account_id,
+				conversation_id: conversation.id,
+				content: firstMessage.message,
+				token: botExists.bot_token,
+			});
+		}
 	}
 
 	// if (
