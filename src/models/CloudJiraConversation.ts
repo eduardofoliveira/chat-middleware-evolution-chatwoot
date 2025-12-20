@@ -3,12 +3,12 @@ import Db from "../database/connectionManager.js";
 type ICloudJiraConversation = {
 	id: number;
 	fk_id_jira: number;
-	issue: number;
+	issue: number | null;
 	conversation_id: number;
 	sender_id: number;
 	sender_name: string;
 	phone_number: string;
-	email: string;
+	email: string | null;
 	step: number;
 	created_at: Date;
 	updated_at: Date;
@@ -34,14 +34,43 @@ export default class CloudJiraConversation {
 	public static async deleteWithUpdatedAtGreaterThan24Hours(): Promise<void> {
 		const db = Db.getConnection();
 
-		// await db(CloudJiraConversation.tableName)
-		// 	.where("updated_at", "<", "now() - INTERVAL '24 hours'")
-		// 	.del()
 		await db.raw(`
       DELETE FROM ${CloudJiraConversation.tableName}
       WHERE updated_at < NOW() - INTERVAL '24 hours';
     `);
 
 		return;
+	}
+
+	public static async create({
+		fk_id_jira,
+		conversation_id,
+		sender_id,
+		sender_name,
+		phone_number,
+		email,
+		step,
+	}: {
+		fk_id_jira: number;
+		conversation_id: number;
+		sender_id: number;
+		sender_name: string;
+		phone_number: string;
+		email: string | null;
+		step: number;
+	}): Promise<ICloudJiraConversation> {
+		const db = Db.getConnection();
+		const [newRecord] = await db(CloudJiraConversation.tableName)
+			.insert({
+				fk_id_jira,
+				conversation_id,
+				sender_id,
+				sender_name,
+				phone_number,
+				email,
+				step,
+			})
+			.returning("*");
+		return newRecord;
 	}
 }

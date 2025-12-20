@@ -4,6 +4,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import getJiraMessage from "../use-cases/bot/getJiraMessage.js";
 import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
 import deleteOldConversations from "../use-cases/bot/deleteOldConversations.js";
+import createJiraConversation from "../use-cases/bot/createJiraConversation.js";
 import getJiraConversation from "../use-cases/bot/getJiraConversation.js";
 import findBot from "../use-cases/bot/findBot.js";
 import findJira from "../use-cases/bot/findJira.js";
@@ -98,12 +99,24 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 
 			console.log("First Message:", firstMessage);
 
+			await createJiraConversation({
+				conversation_id: conversation.id,
+				fk_id_jira: jiraExists.id,
+				email: null,
+				sender_id: sender.id,
+				sender_name: sender.name,
+				phone_number: sender.phone_number,
+				step: 0,
+			});
+
 			await sendMessageToChatwoot({
 				account_id,
 				conversation_id: conversation.id,
 				content: firstMessage.message,
 				token: botExists.bot_token,
 			});
+		} else {
+			console.log("Existing Conversation:", conversationJira);
 		}
 	}
 
