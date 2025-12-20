@@ -102,7 +102,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			await createJiraConversation({
 				conversation_id: conversation.id,
 				fk_id_jira: jiraExists.id,
-				email: null,
+				email: "",
 				sender_id: sender.id,
 				sender_name: sender.name,
 				phone_number: sender.phone_number,
