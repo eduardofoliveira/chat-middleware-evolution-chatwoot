@@ -1,6 +1,8 @@
 import axios from "axios";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
+import findBot from "../use-cases/bot/findBot.js";
+
 const TokenBotDataCosmos = "2h9w9JKmSRHL9E9433fLscN6";
 const CHATWOOT_URL = process.env.CHATWOOT_URL;
 // const API_TOKEN = process.env.CHATWOOT_TOKEN;
@@ -42,6 +44,11 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 		};
 	};
 	const { id: inboxId, name: inboxName } = inbox;
+
+	const botExists = await findBot({ bot_name });
+	if (!botExists) {
+		return reply.status(404).send({ message: "Bot not found" });
+	}
 
 	if (
 		event === "message_created" &&
