@@ -107,6 +107,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 				sender_name: sender.name,
 				phone_number: sender.phone_number,
 				step: 0,
+				issue: 0,
 			});
 
 			await sendMessageToChatwoot({

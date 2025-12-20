@@ -59,7 +59,7 @@ export default class CloudJiraConversation {
 		phone_number: string;
 		email: string | null;
 		step: number;
-		issue: number;
+		issue: number | null;
 	}): Promise<ICloudJiraConversation> {
 		const db = Db.getConnection();
 		const [newRecord] = await db(CloudJiraConversation.tableName)

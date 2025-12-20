@@ -17,7 +17,7 @@ const execute = async ({
 	sender_name: string;
 	phone_number: string;
 	step: number;
-	issue: number;
+	issue: number | null;
 }) => {
 	const conversation = await CloudJiraConversation.create({
 		conversation_id,
