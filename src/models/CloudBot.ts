@@ -12,11 +12,13 @@ export default class CloudBot {
 	static tableName = "cloud_v2_bot";
 
 	public static async getByBotName({
+		account_id,
 		bot_name,
 	}: {
+		account_id: number;
 		bot_name: string;
 	}): Promise<ICloudBot> {
 		const db = Db.getConnection();
-		return db(CloudBot.tableName).where({ bot_name }).first();
+		return db(CloudBot.tableName).where({ account_id, bot_name }).first();
 	}
 }
