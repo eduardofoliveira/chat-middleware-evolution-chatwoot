@@ -34,9 +34,13 @@ export default class CloudJiraConversation {
 	public static async deleteWithUpdatedAtGreaterThan24Hours(): Promise<void> {
 		const db = Db.getConnection();
 
-		await db(CloudJiraConversation.tableName)
-			.where("updated_at", "<", "now() - INTERVAL '24 hours'")
-			.del();
+		// await db(CloudJiraConversation.tableName)
+		// 	.where("updated_at", "<", "now() - INTERVAL '24 hours'")
+		// 	.del()
+		await db.raw(`
+      DELETE FROM ${CloudJiraConversation.tableName}
+      WHERE updated_at < NOW() - INTERVAL '24 hours';
+    `);
 
 		return;
 	}
