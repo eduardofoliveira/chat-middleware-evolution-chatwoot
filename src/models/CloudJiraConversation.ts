@@ -76,4 +76,60 @@ export default class CloudJiraConversation {
 			.returning("*");
 		return newRecord;
 	}
+
+	public static async updateStep({
+		id,
+		step,
+	}: {
+		id: number;
+		step: number;
+	}): Promise<ICloudJiraConversation> {
+		const db = Db.getConnection();
+		const [updatedRecord] = await db(CloudJiraConversation.tableName)
+			.where({ id })
+			.update({ step, updated_at: db.fn.now() })
+			.returning("*");
+		return updatedRecord;
+	}
+
+	public static async update({
+		id,
+		fk_id_jira,
+		conversation_id,
+		sender_id,
+		sender_name,
+		phone_number,
+		email,
+		step,
+		issue,
+	}: {
+		id: number;
+		fk_id_jira: number;
+		conversation_id: number;
+		sender_id: number;
+		sender_name: string;
+		phone_number: string;
+		email: string | null;
+		step: number;
+		issue: number | null;
+	}): Promise<ICloudJiraConversation> {
+		const db = Db.getConnection();
+
+		const [updatedRecord] = await db(CloudJiraConversation.tableName)
+			.where({ id })
+			.update({
+				fk_id_jira,
+				conversation_id,
+				sender_id,
+				sender_name,
+				phone_number,
+				email,
+				step,
+				issue,
+				updated_at: db.fn.now(),
+			})
+			.returning("*");
+
+		return updatedRecord;
+	}
 }

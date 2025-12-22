@@ -8,6 +8,7 @@ import findJira from "../use-cases/bot/findJira.js";
 import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
 import getJiraConversation from "../use-cases/bot/getJiraConversation.js";
 import getJiraMessage from "../use-cases/bot/getJiraMessage.js";
+import updateJiraStepConversation from "../use-cases/bot/updateJiraStepConversation.js";
 
 const TokenBotDataCosmos = "2h9w9JKmSRHL9E9433fLscN6";
 const CHATWOOT_URL = process.env.CHATWOOT_URL;
@@ -144,7 +145,19 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						fk_id_jira: jiraExists.id,
 					});
 
-					console.log("Next Jira Message:", nextJiraMessage);
+					if (nextJiraMessage) {
+						await updateJiraStepConversation({
+							id: conversationJira.id,
+							step: nextStep,
+						});
+
+						await sendMessageToChatwoot({
+							account_id,
+							conversation_id: conversation.id,
+							content: nextJiraMessage.message,
+							token: botExists.bot_token,
+						});
+					}
 				}
 			}
 		}
