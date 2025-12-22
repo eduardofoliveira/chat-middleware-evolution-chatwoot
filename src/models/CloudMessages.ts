@@ -5,7 +5,7 @@ type ICloudMessages = {
 	fk_id_jira: number;
 	step: number;
 	next_step: number | null;
-	message_type: string;
+	message_type: number;
 	input_name: string | null;
 	message: string;
 	response_options: Record<string, unknown> | null;

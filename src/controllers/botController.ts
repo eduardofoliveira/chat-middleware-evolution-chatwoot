@@ -8,6 +8,7 @@ import findJira from "../use-cases/bot/findJira.js";
 import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
 import getJiraConversation from "../use-cases/bot/getJiraConversation.js";
 import getJiraMessage from "../use-cases/bot/getJiraMessage.js";
+import updateJiraConversation from "../use-cases/bot/updateJiraConversation.js";
 import updateJiraStepConversation from "../use-cases/bot/updateJiraStepConversation.js";
 
 const TokenBotDataCosmos = "2h9w9JKmSRHL9E9433fLscN6";
@@ -101,11 +102,13 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 		});
 
 		if (!conversationJira) {
-			const firstMessage = await getFirstJiraMessage({
+			// const firstMessage = await getFirstJiraMessage({
+			// 	fk_id_jira: jiraExists.id,
+			// });
+			const firstMessage = await getJiraMessage({
+				step: 6,
 				fk_id_jira: jiraExists.id,
 			});
-
-			// console.log("First Message:", firstMessage);
 
 			await createJiraConversation({
 				conversation_id: conversation.id,
@@ -132,47 +135,78 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 				fk_id_jira: jiraExists.id,
 			});
 
-			console.log("Jira Message:", jiraMessage);
+			// Navegação por opções de resposta
+			if (jiraMessage && jiraMessage.message_type === 1) {
+				const { response_options } = jiraMessage;
+				if (response_options) {
+					const optionSelected = getMatchingKey(response_options, content);
+					if (optionSelected !== null) {
+						const nextStep = response_options[optionSelected] as {
+							acao: string;
+							step?: number;
+							titulo?: string;
+						};
 
-			const { response_options } = jiraMessage;
-			if (response_options) {
-				const optionSelected = getMatchingKey(response_options, content);
-				if (optionSelected !== null) {
-					const nextStep = response_options[optionSelected] as {
-						acao: string;
-						step?: number;
-						titulo?: string;
-					};
-
-					if (nextStep.acao === "navegar") {
-						const nextJiraMessage = await getJiraMessage({
-							step: nextStep.step as number,
-							fk_id_jira: jiraExists.id,
-						});
-
-						if (nextJiraMessage) {
-							await updateJiraStepConversation({
-								id: conversationJira.id,
+						if (nextStep.acao === "navegar") {
+							const nextJiraMessage = await getJiraMessage({
 								step: nextStep.step as number,
+								fk_id_jira: jiraExists.id,
 							});
 
+							if (nextJiraMessage) {
+								await updateJiraStepConversation({
+									id: conversationJira.id,
+									step: nextStep.step as number,
+								});
+
+								await sendMessageToChatwoot({
+									account_id,
+									conversation_id: conversation.id,
+									content: nextJiraMessage.message,
+									token: botExists.bot_token,
+								});
+							}
+						}
+
+						if (nextStep.acao === "abrir_chamado") {
 							await sendMessageToChatwoot({
 								account_id,
 								conversation_id: conversation.id,
-								content: nextJiraMessage.message,
+								content: `-- Abrir chamado selecionado: ${nextStep.titulo} --`,
 								token: botExists.bot_token,
 							});
 						}
 					}
+				}
+			}
 
-					if (nextStep.acao === "abrir_chamado") {
-						await sendMessageToChatwoot({
-							account_id,
-							conversation_id: conversation.id,
-							content: `-- Abrir chamado selecionado: ${nextStep.titulo} --`,
-							token: botExists.bot_token,
-						});
-					}
+			// Entrada de texto email
+			if (jiraMessage && jiraMessage.message_type === 2) {
+				const inputName = jiraMessage.input_name;
+				if (inputName && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputName)) {
+					await updateJiraConversation({
+						email: content,
+						id: conversationJira.id,
+						step: conversationJira.step,
+						fk_id_jira: jiraExists.id,
+						conversation_id: conversation.id,
+						sender_id: sender.id,
+						sender_name: sender.name,
+						phone_number: sender.phone_number,
+						issue: conversationJira.issue,
+					});
+
+					await updateJiraStepConversation({
+						id: conversationJira.id,
+						step: jiraMessage.next_step as number,
+					});
+				} else {
+					await sendMessageToChatwoot({
+						account_id,
+						conversation_id: conversation.id,
+						content: `Por favor, insira um endereço de email válido.`,
+						token: botExists.bot_token,
+					});
 				}
 			}
 		}
