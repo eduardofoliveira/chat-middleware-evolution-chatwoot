@@ -1,17 +1,16 @@
 import axios from "axios";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
-import getJiraMessage from "../use-cases/bot/getJiraMessage.js";
-import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
-import deleteOldConversations from "../use-cases/bot/deleteOldConversations.js";
 import createJiraConversation from "../use-cases/bot/createJiraConversation.js";
-import getJiraConversation from "../use-cases/bot/getJiraConversation.js";
+import deleteOldConversations from "../use-cases/bot/deleteOldConversations.js";
 import findBot from "../use-cases/bot/findBot.js";
 import findJira from "../use-cases/bot/findJira.js";
+import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
+import getJiraConversation from "../use-cases/bot/getJiraConversation.js";
+import getJiraMessage from "../use-cases/bot/getJiraMessage.js";
 
 const TokenBotDataCosmos = "2h9w9JKmSRHL9E9433fLscN6";
 const CHATWOOT_URL = process.env.CHATWOOT_URL;
-// const API_TOKEN = process.env.CHATWOOT_TOKEN;
 
 const sendMessageToChatwoot = async ({
 	account_id,
@@ -97,7 +96,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 				fk_id_jira: jiraExists.id,
 			});
 
-			console.log("First Message:", firstMessage);
+			// console.log("First Message:", firstMessage);
 
 			await createJiraConversation({
 				conversation_id: conversation.id,
@@ -118,6 +117,13 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			});
 		} else {
 			console.log("Existing Conversation:", conversationJira);
+
+			const jiraMessage = await getJiraMessage({
+				step: conversationJira.step,
+				fk_id_jira: jiraExists.id,
+			});
+
+			console.log("Jira Message:", jiraMessage);
 		}
 	}
 
@@ -270,12 +276,12 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 		return reply.send({ message: "Jira webhook received" });
 	}
 
-	console.log({
-		webhookEvent,
-		relacao,
-		issueId,
-		encontrado: relacao[issueId],
-	});
+	// console.log({
+	// 	webhookEvent,
+	// 	relacao,
+	// 	issueId,
+	// 	encontrado: relacao[issueId],
+	// });
 
 	if (webhookEvent === "comment_created" && relacao[issueId]) {
 		await axios.post(
