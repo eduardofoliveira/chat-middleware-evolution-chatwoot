@@ -183,7 +183,11 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			// Entrada de texto email
 			if (jiraMessage && jiraMessage.message_type === 2) {
 				const inputName = jiraMessage.input_name;
-				if (inputName && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputName)) {
+				if (
+					inputName &&
+					inputName === "email" &&
+					/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content)
+				) {
 					await updateJiraConversation({
 						email: content,
 						id: conversationJira.id,
@@ -200,6 +204,20 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						id: conversationJira.id,
 						step: jiraMessage.next_step as number,
 					});
+
+					const nextJiraMessage = await getJiraMessage({
+						step: jiraMessage.next_step as number,
+						fk_id_jira: jiraExists.id,
+					});
+
+					if (nextJiraMessage) {
+						await sendMessageToChatwoot({
+							account_id,
+							conversation_id: conversation.id,
+							content: nextJiraMessage.message,
+							token: botExists.bot_token,
+						});
+					}
 				} else {
 					await sendMessageToChatwoot({
 						account_id,
