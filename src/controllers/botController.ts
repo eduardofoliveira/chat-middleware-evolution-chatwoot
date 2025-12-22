@@ -138,23 +138,38 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			if (response_options) {
 				const optionSelected = getMatchingKey(response_options, content);
 				if (optionSelected !== null) {
-					const nextStep = response_options[optionSelected] as number;
+					const nextStep = response_options[optionSelected] as {
+						acao: string;
+						step?: number;
+						titulo?: string;
+					};
 
-					const nextJiraMessage = await getJiraMessage({
-						step: nextStep,
-						fk_id_jira: jiraExists.id,
-					});
-
-					if (nextJiraMessage) {
-						await updateJiraStepConversation({
-							id: conversationJira.id,
-							step: nextStep,
+					if (nextStep.acao === "navegar") {
+						const nextJiraMessage = await getJiraMessage({
+							step: nextStep.step as number,
+							fk_id_jira: jiraExists.id,
 						});
 
+						if (nextJiraMessage) {
+							await updateJiraStepConversation({
+								id: conversationJira.id,
+								step: nextStep.step as number,
+							});
+
+							await sendMessageToChatwoot({
+								account_id,
+								conversation_id: conversation.id,
+								content: nextJiraMessage.message,
+								token: botExists.bot_token,
+							});
+						}
+					}
+
+					if (nextStep.acao === "abrir_chamado") {
 						await sendMessageToChatwoot({
 							account_id,
 							conversation_id: conversation.id,
-							content: nextJiraMessage.message,
+							content: `-- Abrir chamado selecionado: ${nextStep.titulo} --`,
 							token: botExists.bot_token,
 						});
 					}
