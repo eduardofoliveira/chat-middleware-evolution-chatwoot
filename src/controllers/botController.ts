@@ -117,7 +117,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 				sender_id: sender.id,
 				sender_name: sender.name,
 				phone_number: sender.phone_number,
-				step: 0,
+				step: 6,
 				issue: 0,
 			});
 
