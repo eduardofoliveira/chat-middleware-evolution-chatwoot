@@ -12,6 +12,14 @@ import getJiraMessage from "../use-cases/bot/getJiraMessage.js";
 const TokenBotDataCosmos = "2h9w9JKmSRHL9E9433fLscN6";
 const CHATWOOT_URL = process.env.CHATWOOT_URL;
 
+const getMatchingKey = (
+	response_options: Record<string, unknown>,
+	resposta: string,
+) => {
+	const key = String(resposta);
+	return Object.hasOwn(response_options, key) ? key : null;
+};
+
 const sendMessageToChatwoot = async ({
 	account_id,
 	conversation_id,
@@ -124,6 +132,21 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			});
 
 			console.log("Jira Message:", jiraMessage);
+
+			const { response_options } = jiraMessage;
+			if (response_options) {
+				const optionSelected = getMatchingKey(response_options, content);
+				if (optionSelected !== null) {
+					const nextStep = response_options[optionSelected] as number;
+
+					const nextJiraMessage = await getJiraMessage({
+						step: nextStep,
+						fk_id_jira: jiraExists.id,
+					});
+
+					console.log("Next Jira Message:", nextJiraMessage);
+				}
+			}
 		}
 	}
 

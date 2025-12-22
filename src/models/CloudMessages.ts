@@ -8,7 +8,7 @@ type ICloudMessages = {
 	message_type: string;
 	input_name: string | null;
 	message: string;
-	response_options: string | null;
+	response_options: Record<string, unknown> | null;
 };
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
