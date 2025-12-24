@@ -5,14 +5,17 @@ import createJiraConversation from "../use-cases/bot/createJiraConversation.js";
 import deleteOldConversations from "../use-cases/bot/deleteOldConversations.js";
 import findBot from "../use-cases/bot/findBot.js";
 import findJira from "../use-cases/bot/findJira.js";
-import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
+// import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
 import getJiraConversation from "../use-cases/bot/getJiraConversation.js";
 import getJiraMessage from "../use-cases/bot/getJiraMessage.js";
+import jiraListTickets from "../use-cases/bot/jiraListTickets.js";
 import updateJiraConversation from "../use-cases/bot/updateJiraConversation.js";
 import updateJiraStepConversation from "../use-cases/bot/updateJiraStepConversation.js";
 
 const TokenBotDataCosmos = "2h9w9JKmSRHL9E9433fLscN6";
 const CHATWOOT_URL = process.env.CHATWOOT_URL;
+
+const opcoes: Record<string, unknown> = {};
 
 const getMatchingKey = (
 	response_options: Record<string, unknown>,
@@ -210,7 +213,22 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						fk_id_jira: jiraExists.id,
 					});
 
-					if (nextJiraMessage) {
+					// Listar Tickets Jira
+					if (nextJiraMessage && nextJiraMessage.message_type === 3) {
+						const listTickets = await jiraListTickets({
+							id_jira: jiraExists.id,
+							email: conversationJira.email as string,
+						});
+
+						await sendMessageToChatwoot({
+							account_id,
+							conversation_id: conversation.id,
+							content: listTickets.textWhatsapp,
+							token: botExists.bot_token,
+						});
+
+						opcoes[conversation.id] = listTickets.relacaoTickets;
+					} else if (nextJiraMessage) {
 						await sendMessageToChatwoot({
 							account_id,
 							conversation_id: conversation.id,
@@ -223,6 +241,31 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						account_id,
 						conversation_id: conversation.id,
 						content: `Por favor, insira um endereço de email válido.`,
+						token: botExists.bot_token,
+					});
+				}
+			}
+
+			// Selecionar o numero do ticket
+			if (jiraMessage && jiraMessage.message_type === 3) {
+				console.log("Selecionar o numero do ticket");
+
+				const relacaoTickets: any = opcoes[conversation.id];
+
+				const opcao = relacaoTickets[Number(content)];
+
+				if (opcao) {
+					await sendMessageToChatwoot({
+						account_id,
+						conversation_id: conversation.id,
+						content: `Você selecionou o ticket com ID: ${opcao}`,
+						token: botExists.bot_token,
+					});
+				} else {
+					await sendMessageToChatwoot({
+						account_id,
+						conversation_id: conversation.id,
+						content: `Opção inválida. Por favor, selecione um número válido da lista de tickets.`,
 						token: botExists.bot_token,
 					});
 				}
