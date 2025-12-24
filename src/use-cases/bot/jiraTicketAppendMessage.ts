@@ -67,22 +67,22 @@ const execute = async ({
 									},
 								],
 							},
-							message
-								.split("\n")
-								.flatMap((line: string, index: number, arr: string[]) => [
-									{
-										type: "text",
-										text: line,
-									},
-									...(index < arr.length - 1
-										? [{ type: "text", text: "\r\n" }]
-										: []),
-								]),
+							// message
+							// 	.split("\n")
+							// 	.flatMap((line: string, index: number, arr: string[]) => [
+							// 		{
+							// 			type: "text",
+							// 			text: line,
+							// 		},
+							// 		...(index < arr.length - 1
+							// 			? [{ type: "text", text: "\r\n" }]
+							// 			: []),
+							// 	]),
 							//
-							// {
-							// 	type: "text",
-							// 	text: "Olá testando \r\n fdfdf",
-							// },
+							{
+								type: "text",
+								text: message.split("\n").join("\r\n"),
+							},
 							// {
 							// 	type: "text",
 							// 	text: "dsiodosid",
