@@ -251,18 +251,22 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			// Selecionar o numero do ticket
 			if (jiraMessage && jiraMessage.message_type === 3) {
 				console.log("Selecionar o numero do ticket");
+				let opcapSelecionada = null;
 
-				const relacaoTickets: any = opcoes[conversation.id];
+				try {
+					const relacaoTickets: any = opcoes[conversation.id];
+					opcapSelecionada = relacaoTickets[Number(content)];
+				} catch (error) {
+					//
+				}
 
-				const opcao = relacaoTickets[Number(content)];
+				console.log({ opcapSelecionada });
 
-				console.log({ opcao });
-
-				if (opcao) {
+				if (opcapSelecionada) {
 					await sendMessageToChatwoot({
 						account_id,
 						conversation_id: conversation.id,
-						content: `Você selecionou o ticket com ID: ${opcao}`,
+						content: `Você selecionou o ticket com ID: ${opcapSelecionada}`,
 						token: botExists.bot_token,
 					});
 				} else {
