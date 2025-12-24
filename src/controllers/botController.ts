@@ -215,6 +215,8 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						fk_id_jira: jiraExists.id,
 					});
 
+					console.log(nextJiraMessage);
+
 					// Listar Tickets Jira
 					if (nextJiraMessage && nextJiraMessage.message_type === 3) {
 						const listTickets = await jiraListTickets({
