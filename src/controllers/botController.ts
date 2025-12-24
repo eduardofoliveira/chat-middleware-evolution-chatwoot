@@ -256,6 +256,8 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 
 				const opcao = relacaoTickets[Number(content)];
 
+				console.log({ opcao });
+
 				if (opcao) {
 					await sendMessageToChatwoot({
 						account_id,
