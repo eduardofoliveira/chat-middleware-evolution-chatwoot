@@ -2,6 +2,7 @@ import axios from "axios";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import createJiraConversation from "../use-cases/bot/createJiraConversation.js";
+import deleteJiraConversation from "../use-cases/bot/deleteJiraConversation.js";
 import deleteOldConversations from "../use-cases/bot/deleteOldConversations.js";
 import findBot from "../use-cases/bot/findBot.js";
 import findJira from "../use-cases/bot/findJira.js";
@@ -135,6 +136,19 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			});
 		} else {
 			console.log("Existing Conversation:", conversationJira);
+
+			if (content.toLowerCase() === "#sair") {
+				await deleteJiraConversation({
+					conversation_id: conversation.id,
+				});
+
+				await sendMessageToChatwoot({
+					account_id,
+					conversation_id: conversation.id,
+					content: `Você saiu do atendimento automatizado. Para iniciar novamente, digite qualquer mensagem.`,
+					token: botExists.bot_token,
+				});
+			}
 
 			if (content.toLowerCase() === "#menu") {
 				const firstMessage = await getJiraMessage({

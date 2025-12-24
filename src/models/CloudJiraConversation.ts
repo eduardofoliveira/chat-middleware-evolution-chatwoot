@@ -42,6 +42,18 @@ export default class CloudJiraConversation {
 		return;
 	}
 
+	public static async delete({
+		conversation_id,
+	}: {
+		conversation_id: number;
+	}): Promise<number> {
+		const db = Db.getConnection();
+		const deletedCount = await db(CloudJiraConversation.tableName)
+			.where({ conversation_id })
+			.del();
+		return deletedCount;
+	}
+
 	public static async create({
 		fk_id_jira,
 		conversation_id,
