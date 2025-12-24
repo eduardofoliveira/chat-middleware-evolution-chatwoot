@@ -8,7 +8,10 @@ import findJira from "../use-cases/bot/findJira.js";
 // import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
 import getJiraConversation from "../use-cases/bot/getJiraConversation.js";
 import getJiraMessage from "../use-cases/bot/getJiraMessage.js";
+import jiraCreateUser from "../use-cases/bot/jiraCreateUser.js";
 import jiraListTickets from "../use-cases/bot/jiraListTickets.js";
+import jiraTicketAppendMessage from "../use-cases/bot/jiraTicketAppendMessage.js";
+import jiraVerifyUserExists from "../use-cases/bot/jiraVerifyUserExists.js";
 import updateJiraConversation from "../use-cases/bot/updateJiraConversation.js";
 import updateJiraStepConversation from "../use-cases/bot/updateJiraStepConversation.js";
 
@@ -133,6 +136,39 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 		} else {
 			console.log("Existing Conversation:", conversationJira);
 
+			if (content.toLowerCase() === "#menu") {
+				const firstMessage = await getJiraMessage({
+					step: 0,
+					fk_id_jira: jiraExists.id,
+				});
+
+				await updateJiraStepConversation({
+					id: conversationJira.id,
+					step: 0,
+				});
+
+				await updateJiraConversation({
+					email: conversationJira.email,
+					id: conversationJira.id,
+					step: 0,
+					fk_id_jira: jiraExists.id,
+					conversation_id: conversation.id,
+					sender_id: sender.id,
+					sender_name: sender.name,
+					phone_number: sender.phone_number,
+					issue: 0,
+				});
+
+				await sendMessageToChatwoot({
+					account_id,
+					conversation_id: conversation.id,
+					content: firstMessage.message,
+					token: botExists.bot_token,
+				});
+
+				return reply.send({ message: "Menu reset to step 0" });
+			}
+
 			const jiraMessage = await getJiraMessage({
 				step: conversationJira.step,
 				fk_id_jira: jiraExists.id,
@@ -225,6 +261,19 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						issue: conversationJira.issue,
 					});
 
+					const accountId = await jiraVerifyUserExists({
+						id_jira: jiraExists.id,
+						email: content,
+					});
+
+					if (!accountId) {
+						await jiraCreateUser({
+							id_jira: jiraExists.id,
+							email: content,
+							name: sender.name,
+						});
+					}
+
 					await updateJiraStepConversation({
 						id: conversationJira.id,
 						step: jiraMessage.next_step as number,
@@ -265,13 +314,28 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 					//
 				}
 
-				console.log({ opcapSelecionada });
-
 				if (opcapSelecionada) {
+					await updateJiraConversation({
+						issue: Number(opcapSelecionada),
+						id: conversationJira.id,
+						step: conversationJira.step,
+						fk_id_jira: jiraExists.id,
+						conversation_id: conversation.id,
+						sender_id: sender.id,
+						sender_name: sender.name,
+						phone_number: sender.phone_number,
+						email: conversationJira.email,
+					});
+
+					await updateJiraStepConversation({
+						id: conversationJira.id,
+						step: jiraMessage.next_step as number,
+					});
+
 					await sendMessageToChatwoot({
 						account_id,
 						conversation_id: conversation.id,
-						content: `Você selecionou o ticket com ID: ${opcapSelecionada}`,
+						content: `Você selecionou o ticket com ID: ${opcapSelecionada}\nTodas as mensagens a partir de agora serão adicionadas como comentários neste ticket.\n\nPara sair digite #menu.`,
 						token: botExists.bot_token,
 					});
 				} else {
@@ -281,130 +345,36 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						content: `Opção inválida. Por favor, selecione um número válido da lista de tickets.`,
 						token: botExists.bot_token,
 					});
+
+					const listTickets = await jiraListTickets({
+						id_jira: jiraExists.id,
+						email: conversationJira.email as string,
+					});
+
+					await sendMessageToChatwoot({
+						account_id,
+						conversation_id: conversation.id,
+						content: listTickets.textWhatsapp,
+						token: botExists.bot_token,
+					});
+
+					opcoes[conversation.id] = listTickets.relacaoTickets;
 				}
+			}
+
+			// Interagir com o ticket selecionado
+			if (conversationJira.issue && jiraMessage.message_type === 4) {
+				await jiraTicketAppendMessage({
+					id_jira: jiraExists.id,
+					email: conversationJira.email as string,
+					issue: conversationJira.issue,
+					message: content,
+					number: sender.phone_number,
+					name: sender.name,
+				});
 			}
 		}
 	}
-
-	// if (
-	// 	event === "message_created" &&
-	// 	message_type === "incoming" &&
-	// 	inboxName === "1137115006" &&
-	// 	inboxId === 41
-	// ) {
-	// 	if (content_type === "text" && content) {
-	// 		console.log("Mensagem de texto recebida no bot Cosmos:");
-	// 		console.log(`Remetente: ${sender.name} (ID: ${sender.id})`);
-	// 		console.log(`Conteúdo: ${content}`);
-
-	// 		await axios.post(
-	// 			"https://cloudcom-team.atlassian.net/rest/api/3/issue/10000/comment",
-	// 			{
-	// 				body: {
-	// 					version: 1,
-	// 					type: "doc",
-	// 					content: [
-	// 						{
-	// 							type: "paragraph",
-	// 							content: [
-	// 								{ type: "text", text: "Nome: ", marks: [{ type: "strong" }] },
-	// 								{ type: "text", text: `${sender.name}\r\n` },
-	// 								{
-	// 									type: "text",
-	// 									text: "Numero: ",
-	// 									marks: [{ type: "strong" }],
-	// 								},
-	// 								{ type: "text", text: `${sender.phone_number}\r\n\r\n` },
-	// 								{
-	// 									type: "text",
-	// 									text: "Mensagem: \r\n",
-	// 									marks: [{ type: "strong" }],
-	// 								},
-	// 								{ type: "text", text: content },
-	// 							],
-	// 						},
-	// 					],
-	// 				},
-	// 			},
-	// 			{
-	// 				headers: {
-	// 					Authorization:
-	// 						"Basic ZWR1YXJkb0BjbG91ZGNvbS5jb20uYnI6QVRBVFQzeEZmR0YwempYSFpMc2l6QlJZYlFCbXoyVF9SREYwNmtfZno2Q3N1T0E2eFpBQllEaC1RYXZzaUlDMk9rbjVHangxZGpZSHJlUUJPUExqUXZ4cUtZMm0yb0U3OUlZLW1zVXZkZ0lfY293TTE0VXZybGJJa0s2bmZnUDA3SnY5NWIyTDVBTEFTWTlPZVhmeVJRdk83Z0hwT1NBaVQtTlpPYmxFV0RScF9TZEoxeGhfVWlnPTg1NUQ5REVC",
-	// 				},
-	// 			},
-	// 		);
-
-	// 		return reply.send({
-	// 			message: `Bot flow endpoint hit for account ${account_id} and bot ${bot_name}`,
-	// 		});
-	// 	}
-
-	// 	if (
-	// 		content_type === "text" &&
-	// 		!content &&
-	// 		conversation?.messages?.[0]?.attachments?.[0]?.data_url
-	// 	) {
-	// 		console.log("Mensagem de anexo recebida no bot Cosmos:");
-	// 		console.log(`Remetente: ${sender.name} (ID: ${sender.id})`);
-	// 		console.log(`Anexo: ${conversation.messages[0].attachments[0].data_url}`);
-
-	// 		await axios.post(
-	// 			"https://cloudcom-team.atlassian.net/rest/api/3/issue/10000/comment",
-	// 			{
-	// 				body: {
-	// 					version: 1,
-	// 					type: "doc",
-	// 					content: [
-	// 						{
-	// 							type: "paragraph",
-	// 							content: [
-	// 								{ type: "text", text: "Nome: ", marks: [{ type: "strong" }] },
-	// 								{ type: "text", text: `${sender.name}\r\n` },
-	// 								{
-	// 									type: "text",
-	// 									text: "Numero: ",
-	// 									marks: [{ type: "strong" }],
-	// 								},
-	// 								{ type: "text", text: `${sender.phone_number}\r\n\r\n` },
-	// 								{
-	// 									type: "text",
-	// 									text: "Mensagem: \r\n",
-	// 									marks: [{ type: "strong" }],
-	// 								},
-	// 								{
-	// 									type: "text",
-	// 									text: conversation.messages[0].attachments[0].data_url,
-	// 								},
-	// 							],
-	// 						},
-	// 					],
-	// 				},
-	// 			},
-	// 			{
-	// 				headers: {
-	// 					Authorization:
-	// 						"Basic ZWR1YXJkb0BjbG91ZGNvbS5jb20uYnI6QVRBVFQzeEZmR0YwempYSFpMc2l6QlJZYlFCbXoyVF9SREYwNmtfZno2Q3N1T0E2eFpBQllEaC1RYXZzaUlDMk9rbjVHangxZGpZSHJlUUJPUExqUXZ4cUtZMm0yb0U3OUlZLW1zVXZkZ0lfY293TTE0VXZybGJJa0s2bmZnUDA3SnY5NWIyTDVBTEFTWTlPZVhmeVJRdk83Z0hwT1NBaVQtTlpPYmxFV0RScF9TZEoxeGhfVWlnPTg1NUQ5REVC",
-	// 				},
-	// 			},
-	// 		);
-
-	// 		return reply.send({
-	// 			message: `Bot flow endpoint hit for account ${account_id} and bot ${bot_name}`,
-	// 		});
-	// 	}
-	// }
-
-	// console.log(
-	// 	JSON.stringify(
-	// 		{
-	// 			account_id,
-	// 			bot_name,
-	// 			body,
-	// 		},
-	// 		null,
-	// 		2,
-	// 	),
-	// );
 
 	return reply.send({
 		message: `Bot flow endpoint hit for account ${account_id} and bot ${bot_name}`,
