@@ -165,6 +165,11 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 									email: conversationJira.email as string,
 								});
 
+								await updateJiraStepConversation({
+									id: conversationJira.id,
+									step: nextStep.step as number,
+								});
+
 								await sendMessageToChatwoot({
 									account_id,
 									conversation_id: conversation.id,
