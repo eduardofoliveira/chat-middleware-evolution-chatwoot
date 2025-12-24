@@ -158,7 +158,22 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 								fk_id_jira: jiraExists.id,
 							});
 
-							if (nextJiraMessage) {
+							// Listar Tickets Jira
+							if (nextJiraMessage && nextJiraMessage.message_type === 3) {
+								const listTickets = await jiraListTickets({
+									id_jira: jiraExists.id,
+									email: conversationJira.email as string,
+								});
+
+								await sendMessageToChatwoot({
+									account_id,
+									conversation_id: conversation.id,
+									content: listTickets.textWhatsapp,
+									token: botExists.bot_token,
+								});
+
+								opcoes[conversation.id] = listTickets.relacaoTickets;
+							} else if (nextJiraMessage) {
 								await updateJiraStepConversation({
 									id: conversationJira.id,
 									step: nextStep.step as number,
@@ -215,24 +230,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						fk_id_jira: jiraExists.id,
 					});
 
-					console.log(nextJiraMessage);
-
-					// Listar Tickets Jira
-					if (nextJiraMessage && nextJiraMessage.message_type === 3) {
-						const listTickets = await jiraListTickets({
-							id_jira: jiraExists.id,
-							email: conversationJira.email as string,
-						});
-
-						await sendMessageToChatwoot({
-							account_id,
-							conversation_id: conversation.id,
-							content: listTickets.textWhatsapp,
-							token: botExists.bot_token,
-						});
-
-						opcoes[conversation.id] = listTickets.relacaoTickets;
-					} else if (nextJiraMessage) {
+					if (nextJiraMessage) {
 						await sendMessageToChatwoot({
 							account_id,
 							conversation_id: conversation.id,
