@@ -201,6 +201,34 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 									email: conversationJira.email as string,
 								});
 
+								if (Object.keys(listTickets.relacaoTickets).length === 0) {
+									await sendMessageToChatwoot({
+										account_id,
+										conversation_id: conversation.id,
+										content: `Nenhum ticket encontrado para o email ${conversationJira.email}.`,
+										token: botExists.bot_token,
+									});
+
+									await updateJiraStepConversation({
+										id: conversationJira.id,
+										step: 0,
+									});
+
+									const firstMessage = await getJiraMessage({
+										step: 0,
+										fk_id_jira: jiraExists.id,
+									});
+
+									await sendMessageToChatwoot({
+										account_id,
+										conversation_id: conversation.id,
+										content: firstMessage.message,
+										token: botExists.bot_token,
+									});
+
+									return reply.send({ message: "No tickets found" });
+								}
+
 								await updateJiraStepConversation({
 									id: conversationJira.id,
 									step: nextStep.step as number,
