@@ -138,6 +138,8 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 				fk_id_jira: jiraExists.id,
 			});
 
+			console.log("Jira Message for Current Step:", jiraMessage);
+
 			// Navegação por opções de resposta
 			if (jiraMessage && jiraMessage.message_type === 1) {
 				const { response_options } = jiraMessage;
