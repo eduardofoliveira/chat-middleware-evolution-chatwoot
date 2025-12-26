@@ -5,6 +5,7 @@ type ICloudBot = {
 	domain_url: string;
 	token: string;
 	fk_id_bot: number;
+	email: string;
 };
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>

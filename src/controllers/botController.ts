@@ -449,7 +449,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			if (conversationJira.issue && jiraMessage.message_type === 4) {
 				await jiraTicketAppendMessage({
 					id_jira: jiraExists.id,
-					email: conversationJira.email as string,
+					email: jiraExists.email,
 					issue: conversationJira.issue,
 					message: content,
 					number: sender.phone_number,
