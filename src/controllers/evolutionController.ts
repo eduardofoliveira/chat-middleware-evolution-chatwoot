@@ -39,8 +39,8 @@ const handleEvolutionWebhook = async (
 		};
 		const data = body?.data;
 
-		console.log("handleEvolutionWebhook");
-		console.log(JSON.stringify(body, null, 2));
+		// console.log("handleEvolutionWebhook");
+		// console.log(JSON.stringify(body, null, 2));
 
 		// console.log({
 		// 	account_id,
@@ -88,10 +88,10 @@ const handleEvolutionWebhook = async (
 		}
 
 		if (remoteJid === "") {
-			console.log({
-				remoteJid,
-				message: "Não foi possível determinar o remoteJid correto",
-			});
+			// console.log({
+			// 	remoteJid,
+			// 	message: "Não foi possível determinar o remoteJid correto",
+			// });
 			remoteJid = data.key.remoteJid;
 		}
 
@@ -107,36 +107,36 @@ const handleEvolutionWebhook = async (
 				account_id: Number(account_id),
 			});
 			if (!contact) {
-				console.log(`Criando contato para ${remoteJid}`);
+				// console.log(`Criando contato para ${remoteJid}`);
 
-				console.log({
-					identifier: remoteJid,
-					account_id: Number(account_id),
-					name: data.pushName || "Sem Nome",
-					phone_number: `+${/(.*)@/.exec(remoteJid)?.[1] || remoteJid}`,
-					country_code: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
-						? "Brazil"
-						: "",
-					custom_attributes: JSON.stringify({ source: "evolution" }),
-					additional_attributes: JSON.stringify({
-						city: "",
-						country: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
-							? "Brazil"
-							: "",
-						description: "",
-						company_name: "",
-						country_code: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
-							? "BR"
-							: "",
-						social_profiles: {
-							github: "",
-							twitter: "",
-							facebook: "",
-							linkedin: "",
-							instagram: "",
-						},
-					}),
-				});
+				// console.log({
+				// 	identifier: remoteJid,
+				// 	account_id: Number(account_id),
+				// 	name: data.pushName || "Sem Nome",
+				// 	phone_number: `+${/(.*)@/.exec(remoteJid)?.[1] || remoteJid}`,
+				// 	country_code: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
+				// 		? "Brazil"
+				// 		: "",
+				// 	custom_attributes: JSON.stringify({ source: "evolution" }),
+				// 	additional_attributes: JSON.stringify({
+				// 		city: "",
+				// 		country: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
+				// 			? "Brazil"
+				// 			: "",
+				// 		description: "",
+				// 		company_name: "",
+				// 		country_code: /(.*)@/.exec(remoteJid)?.[1]?.startsWith("55")
+				// 			? "BR"
+				// 			: "",
+				// 		social_profiles: {
+				// 			github: "",
+				// 			twitter: "",
+				// 			facebook: "",
+				// 			linkedin: "",
+				// 			instagram: "",
+				// 		},
+				// 	}),
+				// });
 
 				await createContact({
 					identifier: remoteJid,
@@ -750,7 +750,7 @@ const handleEvolutionWebhook = async (
 		}
 
 		if (data.messageType === "audioMessage") {
-			console.log("audioMessage");
+			// console.log("audioMessage");
 			// console.log({
 			// 	audioMessage: data.message,
 			// 	path: path.resolve("files", `${data.key.id}.ogg`),
