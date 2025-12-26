@@ -94,6 +94,9 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 	const { id: inboxId, name: inboxName } = inbox;
 
 	if (message_type === "incoming") {
+		console.log("--- New Incoming Message ---");
+		console.log(content);
+
 		const botExists = await findBot({ account_id, bot_name });
 		if (!botExists) {
 			// Encerra fluxo se o bot não for encontrado
@@ -135,7 +138,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 				token: botExists.bot_token,
 			});
 		} else {
-			console.log("Existing Conversation:", conversationJira);
+			// console.log("Existing Conversation:", conversationJira);
 
 			if (content.toLowerCase() === "#sair") {
 				await deleteJiraConversation({
@@ -188,7 +191,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 				fk_id_jira: jiraExists.id,
 			});
 
-			console.log("Jira Message for Current Step:", jiraMessage);
+			// console.log("Jira Message for Current Step:", jiraMessage);
 
 			// Navegação por opções de resposta
 			if (jiraMessage && jiraMessage.message_type === 1) {
@@ -346,7 +349,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 
 			// Selecionar o numero do ticket
 			if (jiraMessage && jiraMessage.message_type === 3) {
-				console.log("Selecionar o numero do ticket");
+				// console.log("Selecionar o numero do ticket");
 				let opcapSelecionada = null;
 
 				try {
