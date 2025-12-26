@@ -66,8 +66,71 @@ const listarChamados = async ({ email }: { email: string }) => {
 	};
 };
 
+const createIssue = async ({
+	email,
+	summary,
+	description,
+}: {
+	email: string;
+	summary: string;
+	description: string;
+}) => {
+	const db = Db.getConnection();
+	const jira = await db("cloud_v2_jira").where({ id: 1 }).first();
+
+	const issueData = {
+		fields: {
+			project: {
+				key: "KAN",
+			},
+			summary,
+			description: {
+				content: [
+					{
+						content: [
+							{
+								text: "Order entry fails when selecting supplier.",
+								type: "text",
+							},
+						],
+						type: "paragraph",
+					},
+				],
+				type: "doc",
+				version: 1,
+			},
+			issuetype: {
+				name: "Task",
+			},
+			reporter: {
+				id: "70121:3e2120df-da90-4624-bf80-98c83d3915a2",
+			},
+		},
+	};
+
+	const { data } = await axios.post(
+		`https://${jira.domain_url}.atlassian.net/rest/api/3/issue`,
+		issueData,
+		{
+			auth: {
+				username: jira.email,
+				password: jira.token,
+			},
+		},
+	);
+
+	return data;
+};
+
 const execute = async () => {
-	const result = await listarChamados({ email: "eduardo@cloudcom.com.br" });
+	// const result = await listarChamados({ email: "eduardo@cloudcom.com.br" });
+	// console.log(result);
+
+	const result = await createIssue({
+		email: "eduardo_felipe_oliveira@yahoo.com.br",
+		summary: "Teste de criação de chamado via API",
+		description: "Descrição do chamado criado via API",
+	});
 
 	console.log(result);
 };

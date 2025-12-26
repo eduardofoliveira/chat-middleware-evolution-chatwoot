@@ -12,7 +12,7 @@ const execute = async ({
 	const db = Db.getConnection();
 	const jira = await db("cloud_v2_jira").where({ id: id_jira }).first();
 
-	const jql = `creator = "${email}" ORDER BY created DESC`;
+	const jql = `reporter = "${email}" ORDER BY created DESC`;
 
 	const { data } = await axios.get(
 		`https://${jira.domain_url}.atlassian.net/rest/api/3/search/jql`,
