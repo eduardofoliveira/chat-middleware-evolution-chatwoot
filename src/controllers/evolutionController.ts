@@ -484,7 +484,7 @@ const handleEvolutionWebhook = async (
 		}
 
 		if (data.messageType === "conversation") {
-			console.log(JSON.stringify(data.message, null, 2));
+			console.log(JSON.stringify(request.body, null, 2));
 
 			if (typeof data.message?.conversation === "string") {
 				// mensagem de texto simples
