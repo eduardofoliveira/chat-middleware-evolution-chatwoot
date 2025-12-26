@@ -109,6 +109,8 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 		console.log(content);
 		console.log(sender);
 
+		const originalContent = content;
+
 		// Se houber o header **alguma_coisa** no início da mensagem, remover essa linha
 		if (/^(?:\*\*.*\*\*\s*\n)?([\s\S]*)/.test(content)) {
 			const match = /^(?:\*\*.*\*\*\s*\n)?([\s\S]*)/.exec(content);
@@ -451,7 +453,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 					id_jira: jiraExists.id,
 					email: jiraExists.email,
 					issue: conversationJira.issue,
-					message: content,
+					message: originalContent,
 					number: sender.phone_number,
 					name: sender.name,
 				});
