@@ -52,6 +52,8 @@ const sendMessageToChatwoot = async ({
 			},
 		},
 	);
+
+	await new Promise((resolve) => setTimeout(resolve, 1500));
 };
 
 const index = async (request: FastifyRequest, reply: FastifyReply) => {
