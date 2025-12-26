@@ -22,6 +22,28 @@ const albums: Record<string, any[]> = {};
 const albumCount: Record<string, number> = {};
 const albumCaptions: Record<string, string> = {};
 
+const extrairContato = (data: any) => {
+	const key = data.data.key;
+
+	const candidatos = [key.participant, key.participantAlt, key.remoteJid];
+
+	const jidTelefone = candidatos.find(
+		(v) => typeof v === "string" && v.endsWith("@s.whatsapp.net"),
+	);
+
+	const telefone = jidTelefone
+		? jidTelefone.replace("@s.whatsapp.net", "")
+		: null;
+
+	const nome = data.data.pushName || null;
+
+	return {
+		nome,
+		telefone,
+		jidTelefone,
+	};
+};
+
 const handleEvolutionWebhook = async (
 	request: FastifyRequest,
 	reply: FastifyReply,
@@ -374,7 +396,8 @@ const handleEvolutionWebhook = async (
 		// console.log('Nova mensagem:', JSON.stringify(data, null, 2));
 		let header = "";
 		if (isGroup) {
-			header = `**${data.pushName} - +${/(.*)@/.exec(data.key.participant)?.[1]}:**\n`;
+			const contato = extrairContato(request.body);
+			header = `**${contato.nome ?? ""} - +${contato.telefone ?? ""}:**\n`;
 		}
 
 		// Caso seja o início de um álbum
@@ -484,7 +507,7 @@ const handleEvolutionWebhook = async (
 		}
 
 		if (data.messageType === "conversation") {
-			console.log(JSON.stringify(request.body, null, 2));
+			// console.log(JSON.stringify(request.body, null, 2));
 
 			if (typeof data.message?.conversation === "string") {
 				// mensagem de texto simples
