@@ -80,6 +80,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			id: number;
 			name: string;
 			phone_number: string;
+			identifier?: string;
 		};
 		event: string;
 		conversation: {
@@ -94,6 +95,14 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 	const { id: inboxId, name: inboxName } = inbox;
 
 	if (message_type === "incoming") {
+		let isGroup = false;
+		if (
+			sender.name.includes(" (Grupo)") ||
+			sender.identifier?.includes("@g.us")
+		) {
+			isGroup = true;
+		}
+
 		console.log("--- New Incoming Message ---");
 		console.log(content);
 		console.log(sender);
@@ -143,7 +152,9 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 			await sendMessageToChatwoot({
 				account_id,
 				conversation_id: conversation.id,
-				content: firstMessage.message,
+				content: !isGroup
+					? firstMessage.message
+					: firstMessage.message.replaceAll("**", "*"),
 				token: botExists.bot_token,
 			});
 		} else {
@@ -188,7 +199,10 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 				await sendMessageToChatwoot({
 					account_id,
 					conversation_id: conversation.id,
-					content: firstMessage.message,
+					// content: firstMessage.message,
+					content: !isGroup
+						? firstMessage.message
+						: firstMessage.message.replaceAll("**", "*"),
 					token: botExists.bot_token,
 				});
 
@@ -248,7 +262,10 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 									await sendMessageToChatwoot({
 										account_id,
 										conversation_id: conversation.id,
-										content: firstMessage.message,
+										// content: firstMessage.message,
+										content: !isGroup
+											? firstMessage.message
+											: firstMessage.message.replaceAll("**", "*"),
 										token: botExists.bot_token,
 									});
 
@@ -263,7 +280,9 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 								await sendMessageToChatwoot({
 									account_id,
 									conversation_id: conversation.id,
-									content: listTickets.textWhatsapp,
+									content: !isGroup
+										? listTickets.textWhatsapp
+										: listTickets.textWhatsapp.replaceAll("**", "*"),
 									token: botExists.bot_token,
 								});
 
@@ -277,7 +296,10 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 								await sendMessageToChatwoot({
 									account_id,
 									conversation_id: conversation.id,
-									content: nextJiraMessage.message,
+									// content: nextJiraMessage.message,
+									content: !isGroup
+										? nextJiraMessage.message
+										: nextJiraMessage.message.replaceAll("**", "*"),
 									token: botExists.bot_token,
 								});
 							}
@@ -342,7 +364,10 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						await sendMessageToChatwoot({
 							account_id,
 							conversation_id: conversation.id,
-							content: nextJiraMessage.message,
+							// content: nextJiraMessage.message,
+							content: !isGroup
+								? nextJiraMessage.message
+								: nextJiraMessage.message.replaceAll("**", "*"),
 							token: botExists.bot_token,
 						});
 					}
@@ -408,7 +433,9 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 					await sendMessageToChatwoot({
 						account_id,
 						conversation_id: conversation.id,
-						content: listTickets.textWhatsapp,
+						content: !isGroup
+							? listTickets.textWhatsapp
+							: listTickets.textWhatsapp.replaceAll("**", "*"),
 						token: botExists.bot_token,
 					});
 
