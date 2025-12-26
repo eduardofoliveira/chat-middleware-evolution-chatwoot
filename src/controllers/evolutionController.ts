@@ -396,6 +396,7 @@ const handleEvolutionWebhook = async (
 		// console.log('Nova mensagem:', JSON.stringify(data, null, 2));
 		let header = "";
 		if (isGroup) {
+			console.log(JSON.stringify(request.body, null, 2));
 			const contato = extrairContato(request.body);
 			header = `**${contato.nome ?? ""} - +${contato.telefone ?? ""}:**\n`;
 		}
