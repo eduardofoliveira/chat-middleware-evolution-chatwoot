@@ -96,6 +96,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 	if (message_type === "incoming") {
 		console.log("--- New Incoming Message ---");
 		console.log(content);
+		console.log(sender);
 
 		// Se houber o header **alguma_coisa** no início da mensagem, remover essa linha
 		if (/^(?:\*\*.*\*\*\s*\n)?([\s\S]*)/.test(content)) {
