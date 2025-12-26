@@ -60,7 +60,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 		bot_name: string;
 	};
 	const body = request.body;
-	const {
+	let {
 		content_type,
 		content,
 		inbox,
@@ -96,6 +96,14 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 	if (message_type === "incoming") {
 		console.log("--- New Incoming Message ---");
 		console.log(content);
+
+		// Se houber o header **alguma_coisa** no início da mensagem, remover essa linha
+		if (/^(?:\*\*.*\*\*\s*\n)?([\s\S]*)/.test(content)) {
+			const match = /^(?:\*\*.*\*\*\s*\n)?([\s\S]*)/.exec(content);
+			if (match?.[1]) {
+				content = match[1].trim();
+			}
+		}
 
 		const botExists = await findBot({ account_id, bot_name });
 		if (!botExists) {
