@@ -21,4 +21,13 @@ export default class CloudBot {
 		const db = Db.getConnection();
 		return db(CloudBot.tableName).where({ account_id, bot_name }).first();
 	}
+
+	public static async getById({
+		id,
+	}: {
+		id: number;
+	}): Promise<ICloudBot> {
+		const db = Db.getConnection();
+		return db(CloudBot.tableName).where({ id }).first();
+	}
 }

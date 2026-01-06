@@ -4,5 +4,5 @@ import botController from "../controllers/botController.js";
 
 export default async function evolutionRoutes(fastify: FastifyInstance) {
 	fastify.post("/bot/flow/:account_id/:bot_name", botController.index);
-	fastify.post("/bot/webhook/jira", botController.jira);
+	fastify.post("/bot/webhook/jira/:fk_id_jira", botController.jira);
 }

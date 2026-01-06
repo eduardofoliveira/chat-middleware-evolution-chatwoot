@@ -6,6 +6,8 @@ import createJiraConversationRelation from "../use-cases/bot/createJiraConversat
 import deleteJiraConversation from "../use-cases/bot/deleteJiraConversation.js";
 import deleteOldConversations from "../use-cases/bot/deleteOldConversations.js";
 import findBot from "../use-cases/bot/findBot.js";
+import findBotById from "../use-cases/bot/findBotById.js";
+import findConversationByJiraIssue from "../use-cases/bot/findConversationByJiraIssue.js";
 import findJira from "../use-cases/bot/findJira.js";
 // import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
 import getJiraConversation from "../use-cases/bot/getJiraConversation.js";
@@ -520,6 +522,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 
 async function jira(req: FastifyRequest, reply: FastifyReply) {
 	const { body, query, params, headers } = req;
+	const { fk_id_jira } = params as { fk_id_jira: number };
 	const { webhookEvent, comment, issue } = body as {
 		webhookEvent: string;
 		comment: { body: string };
@@ -528,43 +531,40 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 	const { id: issueId } = issue as { id: string };
 	const { body: commentBody } = comment as { body: string };
 
-	const relacao: Record<
-		string,
-		{ account_id: number; conversation_id: number }
-	> = {
-		"10000": {
-			account_id: 1,
-			conversation_id: 2306,
-		},
-	};
-
 	if (commentBody.includes("Nome:") && commentBody.includes("Numero:")) {
 		return reply.send({ message: "Jira webhook received" });
 	}
 
-	// console.log({
-	// 	webhookEvent,
-	// 	relacao,
-	// 	issueId,
-	// 	encontrado: relacao[issueId],
-	// });
+	const conversationRelation = await findConversationByJiraIssue({
+		fk_id_jira,
+		issue: Number(issueId),
+	});
 
-	if (webhookEvent === "comment_created" && relacao[issueId]) {
-		await axios.post(
-			`${CHATWOOT_URL}/api/v1/accounts/${relacao[issueId].account_id}/conversations/${relacao[issueId].conversation_id}/messages`,
-			{
-				content: commentBody,
-				message_type: "outgoing",
-			},
-			{
-				headers: {
-					api_access_token: TokenBotDataCosmos,
-				},
-			},
-		);
+	if (conversationRelation) {
+		const jiraExists = await findJira({ bot_id: fk_id_jira });
+
+		if (jiraExists) {
+			const botData = await findBotById({ id: jiraExists.fk_id_bot });
+
+
+			if (botData) {
+				if (webhookEvent === "comment_created" && conversationRelation) {
+					await axios.post(
+						`${CHATWOOT_URL}/api/v1/accounts/${botData.account_id}/conversations/${conversationRelation.conversation_id}/messages`,
+						{
+							content: commentBody,
+							message_type: "outgoing",
+						},
+						{
+							headers: {
+								api_access_token: TokenBotDataCosmos,
+							},
+						},
+					);
+				}
+			}
+		}
 	}
-
-	// console.log(JSON.stringify({ body, query, params, headers }, null, 2));
 
 	return reply.send({ message: "Jira webhook received" });
 }
