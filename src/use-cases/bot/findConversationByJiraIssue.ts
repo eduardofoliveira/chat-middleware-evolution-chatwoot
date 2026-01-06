@@ -12,7 +12,7 @@ const execute = async ({
     issue,
   });
 
-  if (exists && exists.fk_id_jira === fk_id_jira && exists.issue === issue) {
+  if (exists) {
     return exists;
   }
 

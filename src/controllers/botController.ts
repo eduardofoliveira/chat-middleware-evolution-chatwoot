@@ -543,7 +543,7 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 	}
 
 	const conversationRelation = await findConversationByJiraIssue({
-		fk_id_jira,
+		fk_id_jira: Number(fk_id_jira),
 		issue: Number(issueId),
 	});
 
