@@ -534,7 +534,8 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 	console.log({
 		webhookEvent,
 		fk_id_jira,
-		commentBody
+		commentBody,
+		issueId
 	})
 
 	if (commentBody.includes("Nome:") && commentBody.includes("Numero:")) {
