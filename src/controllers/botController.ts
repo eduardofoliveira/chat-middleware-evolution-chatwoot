@@ -327,7 +327,7 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 							const ticketData = await jiraCreateTicket({
 								id_jira: jiraExists.id,
 								title: nextStep.titulo as string,
-								content: `Ticket aberto pelo Whatsapp.\n Nome: ${sender.name}\nNumero: ${sender.phone_number}`,
+								content: `Ticket aberto pelo Whatsapp.\n*Nome*: ${sender.name}\n*Numero*: ${sender.phone_number}`,
 								reporter_id: accountId,
 							})
 
@@ -336,6 +336,19 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 								conversation_id: conversation.id,
 								content: `Seu ticket foi criado com sucesso! O ID do seu ticket é: ${ticketData.id} - ${ticketData.key}`,
 								token: botExists.bot_token,
+							})
+
+							await sendMessageToChatwoot({
+								account_id,
+								conversation_id: conversation.id,
+								content: `Todas as mensagens a partir de agora serão adicionadas como comentários neste ticket.\n\nPara sair digite #menu.`,
+								token: botExists.bot_token,
+							})
+
+							await createJiraConversationRelation({
+								conversation_id: conversation.id,
+								fk_id_jira: jiraExists.id,
+								issue: ticketData.id,
 							})
 
 							await updateJiraConversation({
