@@ -547,39 +547,39 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 		issue: Number(issueId),
 	});
 
-	console.log({
-		conversationRelation
-	})
-
-	if (conversationRelation) {
-		const jiraExists = await findJira({ bot_id: fk_id_jira });
+	if (conversationRelation && conversationRelation.length > 0) {
+		for await (const relation of conversationRelation) {
+			if (relation) {
+				const jiraExists = await findJira({ bot_id: fk_id_jira });
 
 
-		console.log({
-			jiraExists
-		})
+				console.log({
+					jiraExists
+				})
 
-		if (jiraExists) {
-			const botData = await findBotById({ id: jiraExists.fk_id_bot });
+				if (jiraExists) {
+					const botData = await findBotById({ id: jiraExists.fk_id_bot });
 
-			console.log({
-				botData
-			})
+					console.log({
+						botData
+					})
 
-			if (botData) {
-				if (webhookEvent === "comment_created" && conversationRelation) {
-					await axios.post(
-						`${CHATWOOT_URL}/api/v1/accounts/${botData.account_id}/conversations/${conversationRelation.conversation_id}/messages`,
-						{
-							content: commentBody,
-							message_type: "outgoing",
-						},
-						{
-							headers: {
-								api_access_token: TokenBotDataCosmos,
-							},
-						},
-					);
+					if (botData) {
+						if (webhookEvent === "comment_created" && relation) {
+							await axios.post(
+								`${CHATWOOT_URL}/api/v1/accounts/${botData.account_id}/conversations/${relation.conversation_id}/messages`,
+								{
+									content: commentBody,
+									message_type: "outgoing",
+								},
+								{
+									headers: {
+										api_access_token: TokenBotDataCosmos,
+									},
+								},
+							);
+						}
+					}
 				}
 			}
 		}

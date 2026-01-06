@@ -33,11 +33,10 @@ export default class CloudJiraConversationRelation {
   }: {
     issue: number;
     fk_id_jira: number;
-  }): Promise<ICloudJiraConversationRelation> {
+  }): Promise<ICloudJiraConversationRelation[]> {
     const db = Db.getConnection();
     return db(CloudJiraConversationRelation.tableName)
       .where({ issue, fk_id_jira })
-      .first();
   }
 
   public static async deleteByConversationId({
