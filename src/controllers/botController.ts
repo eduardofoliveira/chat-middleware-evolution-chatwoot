@@ -2,6 +2,7 @@ import axios from "axios";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import createJiraConversation from "../use-cases/bot/createJiraConversation.js";
+import createJiraConversationRelation from "../use-cases/bot/createJiraConversationRelation.js";
 import deleteJiraConversation from "../use-cases/bot/deleteJiraConversation.js";
 import deleteOldConversations from "../use-cases/bot/deleteOldConversations.js";
 import findBot from "../use-cases/bot/findBot.js";
@@ -9,6 +10,7 @@ import findJira from "../use-cases/bot/findJira.js";
 // import getFirstJiraMessage from "../use-cases/bot/getFirstJiraMessage.js";
 import getJiraConversation from "../use-cases/bot/getJiraConversation.js";
 import getJiraMessage from "../use-cases/bot/getJiraMessage.js";
+import jiraCreateTicket from "../use-cases/bot/jiraCreateTicket.js";
 import jiraCreateUser from "../use-cases/bot/jiraCreateUser.js";
 import jiraListTickets from "../use-cases/bot/jiraListTickets.js";
 import jiraTicketAppendMessage from "../use-cases/bot/jiraTicketAppendMessage.js";
@@ -310,12 +312,43 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						}
 
 						if (nextStep.acao === "abrir_chamado") {
+							// await sendMessageToChatwoot({
+							// 	account_id,
+							// 	conversation_id: conversation.id,
+							// 	content: `-- Abrir chamado selecionado: ${nextStep.titulo} --`,
+							// 	token: botExists.bot_token,
+							// });
+
+							const accountId = await jiraVerifyUserExists({
+								id_jira: jiraExists.id,
+								email: conversationJira.email as string,
+							});
+
+							const ticketData = await jiraCreateTicket({
+								id_jira: jiraExists.id,
+								title: nextStep.titulo as string,
+								content: `Ticket aberto pelo Whatsapp.\n Nome: ${sender.name}\nNumero: ${sender.phone_number}`,
+								reporter_id: accountId,
+							})
+
 							await sendMessageToChatwoot({
 								account_id,
 								conversation_id: conversation.id,
-								content: `-- Abrir chamado selecionado: ${nextStep.titulo} --`,
+								content: `Seu ticket foi criado com sucesso! O ID do seu ticket é: ${ticketData.id} - ${ticketData.key}`,
 								token: botExists.bot_token,
-							});
+							})
+
+							await updateJiraConversation({
+								issue: ticketData.id,
+								id: conversationJira.id,
+								step: nextStep.step as number,
+								fk_id_jira: jiraExists.id,
+								conversation_id: conversation.id,
+								sender_id: sender.id,
+								sender_name: sender.name,
+								phone_number: sender.phone_number,
+								email: conversationJira.email,
+							})
 						}
 					}
 				}
@@ -409,6 +442,12 @@ const index = async (request: FastifyRequest, reply: FastifyReply) => {
 						phone_number: sender.phone_number,
 						email: conversationJira.email,
 					});
+
+					await createJiraConversationRelation({
+						conversation_id: conversation.id,
+						fk_id_jira: jiraExists.id,
+						issue: Number(opcapSelecionada),
+					})
 
 					await updateJiraStepConversation({
 						id: conversationJira.id,
