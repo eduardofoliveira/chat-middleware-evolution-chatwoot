@@ -531,6 +531,12 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 	const { id: issueId } = issue as { id: string };
 	const { body: commentBody } = comment as { body: string };
 
+	console.log({
+		webhookEvent,
+		fk_id_jira,
+		commentBody
+	})
+
 	if (commentBody.includes("Nome:") && commentBody.includes("Numero:")) {
 		return reply.send({ message: "Jira webhook received" });
 	}
@@ -540,12 +546,24 @@ async function jira(req: FastifyRequest, reply: FastifyReply) {
 		issue: Number(issueId),
 	});
 
+	console.log({
+		conversationRelation
+	})
+
 	if (conversationRelation) {
 		const jiraExists = await findJira({ bot_id: fk_id_jira });
+
+
+		console.log({
+			jiraExists
+		})
 
 		if (jiraExists) {
 			const botData = await findBotById({ id: jiraExists.fk_id_bot });
 
+			console.log({
+				botData
+			})
 
 			if (botData) {
 				if (webhookEvent === "comment_created" && conversationRelation) {
